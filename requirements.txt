@@ -1,0 +1,14 @@
+accelerate
+datasets
+deepspeed
+fire
+hydra-core
+omegaconf
+openai
+rouge_score
+sacrebleu
+sentencepiece
+torch
+transformers
+wandb
+bitsandbytes
