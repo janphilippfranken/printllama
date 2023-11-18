@@ -6,6 +6,7 @@ import hydra
 from omegaconf import DictConfig
 import datetime
 from tqdm import tqdm
+import wandb
 
 import sys
 
@@ -14,7 +15,7 @@ from peft import (
     LoraConfig,
     get_peft_model,
     get_peft_model_state_dict,
-    prepare_model_for_int8_training,
+    prepare_model_for_kbit_training,
     set_peft_model_state_dict,
 )
 from transformers import AutoTokenizer, AutoModelForCausalLM, TrainingArguments, Trainer, DataCollatorForSeq2Seq
@@ -25,8 +26,8 @@ def get_model_and_tokenizer(
     args: DictConfig,         
 ) -> AutoModelForCausalLM:
     """Get model and tokenizer from config"""
-    model = AutoModelForCausalLM.from_pretrained(**args.model.base_model)
-    tokenizer =  AutoTokenizer.from_pretrained(**args.model.tokenizer)
+    model = AutoModelForCausalLM.from_pretrained(**args.base_model, torch_dtype=torch.float16)
+    tokenizer =  AutoTokenizer.from_pretrained(**args.tokenizer)
     return model, tokenizer
 
 # tokenize
@@ -56,19 +57,21 @@ You must output the SQL query that answers the question.
 ### Response:
 {data_point["answer"]}
 """
-    return tokenize(full_prompt=full_prompt, tokenizer=tokenizer)
+    return tokenize(full_prompt, tokenizer)
   
 
 # run 
-@hydra.main(version_base=None, config_path="config", config_name="config")
+@hydra.main(version_base=None, config_path="config", config_name="codellama_7b")
 def main(args: DictConfig) -> None:
 
-    
-    # get model and tokenizer
-    model, tokenizer = get_model_and_tokenizer(args)
+
+   
+    model, tokenizer = get_model_and_tokenizer(args.model)
+
+    # breakpoint()
 
     # get data
-    dataset = load_dataset("b-mc2/sql-create-context", split="train")
+    dataset = load_dataset("b-mc2/sql-create-context", split="train", cache_dir="/scr/jphilipp/printllama-hgx/data")
     subset_dataset = dataset.select(range(130))
     train_dataset = subset_dataset.select(range(100))
     eval_dataset = subset_dataset.select(range(100, 130))
@@ -79,11 +82,13 @@ def main(args: DictConfig) -> None:
     tokenizer.padding_side = "left"
 
     # tokenize
-    tokenized_train_dataset = train_dataset.map(generate_and_tokenize_prompt)
-    tokenized_val_dataset = eval_dataset.map(generate_and_tokenize_prompt)
+    tokenized_train_dataset = train_dataset.map(lambda data_point: generate_and_tokenize_prompt(data_point, tokenizer))
+    tokenized_val_dataset = eval_dataset.map(lambda data_point: generate_and_tokenize_prompt(data_point, tokenizer))
 
     model.train() # put model back into training mode
-    model = prepare_model_for_int8_training(model)
+    model = prepare_model_for_kbit_training(model)
+
+    # breakpoint()
 
     config = LoraConfig(
         r=16,
@@ -112,6 +117,8 @@ def main(args: DictConfig) -> None:
 
     wandb_project = "printllama"
     if len(wandb_project) > 0:
+        os.environ["WANDB_API_KEY"] = "4d0657af83292fcbbcd01a9083fade1a1249ec3b"
+        wandb.login()
         os.environ["WANDB_PROJECT"] = wandb_project
 
     if torch.cuda.device_count() > 1:
@@ -119,31 +126,31 @@ def main(args: DictConfig) -> None:
         model.is_parallelizable = True
         model.model_parallel = True
 
-    batch_size = 64
-    per_device_train_batch_size = 32
+    batch_size = 8
+    per_device_train_batch_size = 4
     gradient_accumulation_steps = batch_size // per_device_train_batch_size
     output_dir = "/scr/jphilipp/printllama-hgx/finetuned_hf_models/codellama_7b_hf"
 
     training_args = TrainingArguments(
         per_device_train_batch_size=per_device_train_batch_size,
         gradient_accumulation_steps=gradient_accumulation_steps,
-        warmup_steps=100,
-        max_steps=400,
+        warmup_steps=1,
+        max_steps=4,
         learning_rate=3e-4,
         fp16=True,
-        logging_steps=10,
+        logging_steps=1,
         optim="adamw_torch",
         evaluation_strategy="steps", # if val_set_size > 0 else "no",
         save_strategy="steps",
-        eval_steps=20,
-        save_steps=20,
+        eval_steps=1,
+        save_steps=1,
         output_dir=output_dir,
         # save_total_limit=3,
         load_best_model_at_end=False,
         # ddp_find_unused_parameters=False if ddp else None,
         group_by_length=True, # group sequences of roughly the same length together to speed up training
         report_to="wandb", # if use_wandb else "none",
-        run_name=f"codellama-{datetime.now().strftime('%Y-%m-%d-%H-%M')}", # if use_wandb else None,
+        run_name=f"codellama-test", # if use_wandb else None,
     )
 
     trainer = Trainer(
@@ -167,3 +174,9 @@ def main(args: DictConfig) -> None:
         model = torch.compile(model)
 
     trainer.train()
+
+if __name__ == "__main__":
+    main()
+
+# torchrun --nproc_per_node=1 finetune.py model.codellama_7b
+# python finetune.py --config-name=model/codellama_7b

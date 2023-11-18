@@ -4,7 +4,7 @@ model:
   base_model:
     pretrained_model_name_or_path: "codellama/CodeLlama-7b-hf"
     load_in_8bit: true
-    torch_dtype: torch.float16
+    # torch_dtype: "float16"
     device_map: "auto"
     cache_dir: "/scr/jphilipp/printllama-hgx/pretrained_hf_models/codellama_7b_hf"
 
