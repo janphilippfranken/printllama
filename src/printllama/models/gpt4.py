@@ -6,11 +6,20 @@ from typing import (
 
 import asyncio
 
-from prices import MODEL_COST_PER_INPUT, MODEL_COST_PER_OUTPUT
 
-class LLMAgent():
+ # The cost per token for each model input.
+MODEL_COST_PER_INPUT = {
+    'gpt-4': 3e-05,
+}
+# The cost per token for each model output.
+MODEL_COST_PER_OUTPUT = {
+    'gpt-4': 6e-05,
+}
+
+
+class GPT4Agent():
     """
-    Simple (Chat) LLM Agent class supporting async API calls.
+    gpt-4 LLM wrapper for async API calls.
     """
     def __init__(
         self, 
@@ -19,7 +28,8 @@ class LLMAgent():
         budget: int,
         **model_args,
     ) -> None:
-        super().__init__(llm, model_id)
+        self.llm = llm
+        self.model_id = model_id
         self.budget = budget
         self.model_args = model_args
         self.all_responses = []

@@ -15,3 +15,4 @@ scipy
 fire
 sentencepiece
 trl
+pyext

@@ -6,7 +6,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 
 class CodeLlama():
     """
-    Simple wrapper for codellama model.
+    Wrapper for HF CodeLlama model.
     """
     def __init__(
         self, 
@@ -16,6 +16,7 @@ class CodeLlama():
         torch_dtype: str = "float16",
         model_cache_dir: str = "/scr/jphilipp/printllama-hgx/pretrained_hf_models/codellama_7b_hf",
         tokenizer_cache_dir: str = "/scr/jphilipp/printllama-hgx/pretrained_hf_models/codellama_7b_hf",
+        max_new_tokens: int = 2000,
         ):
         """
         Initializes AsyncAzureOpenAI client.
@@ -34,14 +35,19 @@ class CodeLlama():
             cache_dir=model_cache_dir,
         )
 
+        self.max_new_tokens = max_new_tokens
+
+    @property
+    def llm_type(self):
+        return "HFCodeLlama"
+    
     def __call__(self, 
         prompt: str,
-        max_new_tokens: int = 500,
     ):
         """
         Make a call.
         """
         model_input = self.tokenizer(prompt, return_tensors="pt").to(self.model.device)
         with torch.no_grad():
-            response = self.tokenizer.decode(self.model.generate(**model_input, max_new_tokens=max_new_tokens)[0], skip_special_tokens=True)
+            response = self.tokenizer.decode(self.model.generate(**model_input, max_new_tokens=self.max_new_tokens)[0], skip_special_tokens=True)
         return response

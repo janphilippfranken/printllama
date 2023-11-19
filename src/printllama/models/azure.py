@@ -2,9 +2,10 @@ from typing import List, Dict
 
 from openai import AsyncAzureOpenAI
 
+
 class AsyncAzureChatLLM:
     """
-    Simple wrapper for an Azure Chat Model.
+    Wrapper for an (Async) Azure Chat Model.
     """
     def __init__(
         self, 

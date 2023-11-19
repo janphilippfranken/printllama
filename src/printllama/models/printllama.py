@@ -37,7 +37,11 @@ class PrintLlama():
         )
 
         self.model = PeftModel.from_pretrained(model, output_dir=output_dir)
-
+    
+    @property
+    def llm_type(self):
+        return "PeftPrintLlama"
+    
     def __call__(self, 
         prompt: str,
         max_new_tokens: int = 500,
