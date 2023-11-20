@@ -6,7 +6,7 @@
 #SBATCH --gres=gpu:1  # Requesting one GPU
 #SBATCH --mem=500G
 #SBATCH --cpus-per-task=64
-#SBATCH --time=3-0
+#SBATCH --time=12:00:00
 #SBATCH --output=job_output.%j.out
 #SBATCH --error=job_output.%j.err
 
@@ -21,4 +21,4 @@ export CUDA_VISIBLE_DEVICES=0,1
 cd ~/research_projects/printllama/experiments/apps
 
 # Run
-torchrun --standalone --nproc_per_node=1 add_codellama_prints.py
+torchrun --nproc_per_node=1 add_codellama_prints.py

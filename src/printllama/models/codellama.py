@@ -1,8 +1,9 @@
 from typing import List, Dict
 
 import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer
+from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 
+from typing import Optional
 # from torch.nn import DataParallel
 
 
@@ -18,12 +19,18 @@ class CodeLlama():
         torch_dtype: str = "float16",
         model_cache_dir: str = "/scr/jphilipp/printllama-hgx/pretrained_hf_models/codellama_7b_hf",
         tokenizer_cache_dir: str = "/scr/jphilipp/printllama-hgx/pretrained_hf_models/codellama_7b_hf",
+        use_flash_attention_2: bool = True,
         max_new_tokens: int = 2000,
         ):
         """
         Initializes CodeLLama.
         """
         torch_dtype = torch.float16 if "16" in torch_dtype else torch.float32
+
+        # quantization_config = BitsAndBytesConfig(
+        #     load_in_4bit=True,
+        #     bnb_4bit_compute_dtype=torch.float16
+        # )
 
         self.tokenizer = AutoTokenizer.from_pretrained(
             pretrained_model_name_or_path=pretrained_model_name_or_path, 
@@ -35,6 +42,8 @@ class CodeLlama():
             torch_dtype=torch_dtype,
             device_map=device_map,
             cache_dir=model_cache_dir,
+            use_flash_attention_2=use_flash_attention_2,
+
         )
 
 
@@ -43,21 +52,19 @@ class CodeLlama():
     @property
     def llm_type(self):
         return "HFCodeLlama"
-    
+
     def __call__(self, 
         prompt: str,
     ):
         """
         Make a call.
         """
-        prompt = """def remove_non_ascii(s: str) -> str:
-<FILL_ME>
-    return result"""
-        print(prompt)
-        model_input = self.tokenizer(prompt, return_tensors="pt").to(self.model.device)["input_ids"]
-        with torch.no_grad():
-            generated_ids = self.model.generate(model_input, max_new_tokens=self.max_new_tokens)
-            response = self.tokenizer.batch_decode(generated_ids[:, model_input.shape[1]:], skip_special_tokens = True)[0]
-            breakpoint()
-            # response = self.tokenizer.decode(self.model.generate(model_input, max_new_tokens=self.max_new_tokens)[0], skip_special_tokens=True)
-        return response
+        inputs = self.tokenizer(prompt, return_tensors="pt", add_special_tokens=False).to(self.model.device)
+        output = self.model.generate(
+            inputs["input_ids"],
+            max_new_tokens=self.max_new_tokens,
+            top_p=0.9,
+            do_sample=True,
+            temperature=0.1,
+        )
+        return self.tokenizer.decode(output[0])
