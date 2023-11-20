@@ -7,7 +7,8 @@ from typing import List, Dict, Any
 from printllama.models.codellama import CodeLlama
 from printllama.helpers import extract_code, extract_assistant_completion
 
-
+from datasets import Dataset
+import pandas as pd
 
 B_INST, E_INST = "[INST]", "[/INST]"
 B_SYS, E_SYS = "<<SYS>>\n", "\n<</SYS>>\n\n"
@@ -16,21 +17,22 @@ def generate_print_statements(question: str, faulty_solution: str, codellama: Co
     """Generate print statements for debugging a given solution."""
     
     
-    system = """Provide answers in Python."""
+    system = """You are an expert computer science reasearcher and programmer, especially skilled at debugging algorithms."""
 
-    user = f"""{question}
-Here is a solution to the problem:
+    user = f"""I have to solve the following problem:
+{question}
+Here is my initial solution to the problem:
 ```python
 {faulty_solution}
 ```
-Insert print statements within in the initial solution to the problem that will help me debug and improve the program.
-Do not add anything else, only insert print statements WITHIN THE INITIAL SOLUTION that will help me debug and improve the program"""
-
+Insert print statements within in the initial solution that will help me debug and improve the program. 
+Be as creative as you can under the constraints. The return from your print statements must be helpful and non-trivial. 
+First, propose an idea, then implement it. Do not add anything else, only insert print statements."""
+    
     prompt = f"<s>{B_INST} {B_SYS}{system}{E_SYS}{user} {E_INST}"
     codellama_prints = []
     codellama_responses = []
-
-    # breakpoint()
+    breakpoint()
     for n_print in range(n_prints):
         print(f"Generating print statement: {n_print + 1}/{n_prints}")
         codellama_print = codellama(prompt)
@@ -44,25 +46,32 @@ Do not add anything else, only insert print statements WITHIN THE INITIAL SOLUTI
     return codellama_prints, codellama_responses
 
 def add_codellama_prints(args: argparse.Namespace, codellama: CodeLlama) -> None:
-    """Add generated print statements to the dataset and overwrite it."""
-    ds = load_dataset('json', data_files=args.dataset_path)
-    updated_items: List[Dict[str, Any]] = []
+    ds = load_dataset('json', data_files=args.dataset_path_load)['train']
 
-    for item in tqdm(ds['train']):
+    updated_items = []
+
+    for item in tqdm(ds):
+        # Check if CodeLlama outputs already exist
+        if 'codellama_print_statements' in item:
+            updated_items.append(item)
+            continue
+
         question = item['question']
         faulty_solution = item['faulty_solutions'][0]
         codellama_prints, codellama_responses = generate_print_statements(question, faulty_solution, codellama, args.n_prints)
         item['codellama_print_statements'] = codellama_prints
         item['codellama_responses'] = codellama_responses
         updated_items.append(item)
+        breakpoint()
+    updated_dataset = Dataset.from_pandas(pd.DataFrame(updated_items))
+    updated_dataset.to_json(args.dataset_path_save)
 
-    with open(args.dataset_path, 'w') as f:
-        json.dump(updated_items, f, indent=4)
 
 def main() -> None:
     # Dataset args
     parser = argparse.ArgumentParser(description="Process dataset items by adding CodeLlama-generated print statements.")
-    parser.add_argument("--dataset_path", type=str, default="../../data/filtered_apps_introductory.json", help="Path to the dataset file.")
+    parser.add_argument("--dataset_path_load", type=str, default="../../data/repaired_apps_filtered_intro_test.json", help="Path to the dataset file.")
+    parser.add_argument("--dataset_path_save", type=str, default="../../data/codellama_apps_filtered_intro_test.json", help="Path to save the updated dataset file.")
     parser.add_argument("--n_prints", type=int, default=1, help="Number of prints to add.")
     parser.add_argument("--timeout", type=int, default=10, help="Timeout for solution evaluation.")
     parser.add_argument("--debug", action="store_true", help="Enable debug mode.")

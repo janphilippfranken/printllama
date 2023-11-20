@@ -9,7 +9,7 @@ import pandas as pd
 from printllama.models.azure import AsyncAzureChatLLM
 from printllama.models.gpt4 import GPT4Agent
 
-from evaluate import check_correctness
+from evaluate_apps import check_correctness
 from gpt4_prompts import generate_faulty_solutions
 
 from datasets import Dataset

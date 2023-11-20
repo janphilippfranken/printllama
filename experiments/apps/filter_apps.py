@@ -2,7 +2,7 @@ import multiprocessing
 import argparse
 from datasets import load_dataset
 from tqdm import tqdm
-import testing_util as test_util
+import testing_util_apps as test_util
 import doctest
 import json
 
