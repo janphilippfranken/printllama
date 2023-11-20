@@ -1,0 +1,9 @@
+model:
+  base_model:
+    pretrained_model_name_or_path: codellama/CodeLlama-7b-Instruct-hf
+    load_in_8bit: false
+    device_map: auto
+    cache_dir: /scr/jphilipp/printllama-hgx/pretrained_hf_models/codellama_7b_instruct_hf
+  tokenizer:
+    pretrained_model_name_or_path: codellama/CodeLlama-7b-Instruct-hf
+    cache_dir: /scr/jphilipp/printllama-hgx/pretrained_hf_models/codellama_7b_instruct_hf

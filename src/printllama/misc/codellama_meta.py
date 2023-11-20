@@ -347,6 +347,7 @@ class Llama:
                 bos=True,
                 eos=False,
             )
+            breakpoint()
             prompt_tokens.append(dialog_tokens)
 
         generation_tokens, generation_logprobs = self.generate(

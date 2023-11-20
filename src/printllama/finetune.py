@@ -61,7 +61,7 @@ You must output the SQL query that answers the question.
   
 
 # run 
-@hydra.main(version_base=None, config_path="config", config_name="codellama_7b")
+@hydra.main(version_base=None, config_path="config", config_name="config")
 def main(args: DictConfig) -> None:
 
 
@@ -88,7 +88,7 @@ def main(args: DictConfig) -> None:
     model.train() # put model back into training mode
     model = prepare_model_for_kbit_training(model)
 
-    # breakpoint()
+    breakpoint()
 
     config = LoraConfig(
         r=16,
@@ -129,7 +129,7 @@ def main(args: DictConfig) -> None:
     batch_size = 8
     per_device_train_batch_size = 4
     gradient_accumulation_steps = batch_size // per_device_train_batch_size
-    output_dir = "/scr/jphilipp/printllama-hgx/finetuned_hf_models/codellama_7b_hf"
+    output_dir = "/scr/jphilipp/printllama-hgx/finetuned_hf_models/codellama_7b_instruct_hf"
 
     training_args = TrainingArguments(
         per_device_train_batch_size=per_device_train_batch_size,

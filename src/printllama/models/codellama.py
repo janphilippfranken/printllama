@@ -17,8 +17,8 @@ class CodeLlama():
         load_in_8bit: str = True,
         device_map: str = "auto",
         torch_dtype: str = "float16",
-        model_cache_dir: str = "/scr/jphilipp/printllama-hgx/pretrained_hf_models/codellama_7b_hf",
-        tokenizer_cache_dir: str = "/scr/jphilipp/printllama-hgx/pretrained_hf_models/codellama_7b_hf",
+        model_cache_dir: str = "/scr/jphilipp/printllama-hgx/pretrained_hf_models/codellama_7b_instruct_hf",
+        tokenizer_cache_dir: str = "/scr/jphilipp/printllama-hgx/pretrained_hf_models/codellama_7b_instruct_hf",
         use_flash_attention_2: bool = True,
         max_new_tokens: int = 2000,
         ):
@@ -26,11 +26,6 @@ class CodeLlama():
         Initializes CodeLLama.
         """
         torch_dtype = torch.float16 if "16" in torch_dtype else torch.float32
-
-        # quantization_config = BitsAndBytesConfig(
-        #     load_in_4bit=True,
-        #     bnb_4bit_compute_dtype=torch.float16
-        # )
 
         self.tokenizer = AutoTokenizer.from_pretrained(
             pretrained_model_name_or_path=pretrained_model_name_or_path, 
@@ -42,8 +37,6 @@ class CodeLlama():
             torch_dtype=torch_dtype,
             device_map=device_map,
             cache_dir=model_cache_dir,
-            use_flash_attention_2=use_flash_attention_2,
-
         )
 
 

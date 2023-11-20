@@ -11,6 +11,21 @@ def extract_code(
              code = ["def algorithm(*args): return 0" for _ in algorithm_strs]
         return code
 
+def extract_assistant_completion(completion: str) -> str:
+    """
+    Extracts the portion of the completion that comes after the [/INST] tag.
+    """
+    end_tag = "[/INST]"
+    end_idx = completion.find(end_tag)
+
+    if end_idx != -1:
+        # Extracting the portion after the end tag
+        post_inst_content = completion[end_idx + len(end_tag):]
+        return post_inst_content.strip()  # Strips leading/trailing whitespace
+    else:
+        return ""  # Returns an empty string if the end tag is not found
+
+
 def insert_prints_with_printllama(
     prompts, 
     printllama
