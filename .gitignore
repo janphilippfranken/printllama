@@ -8,7 +8,13 @@ __pycache__/
 
 # macOS display setting files
 .DS_Store
+*/.DS_Store
 **/.DS_Store
+
+# ignore data directory
+data/
+**/data/
+*/data/
 
 
 # Distribution / packaging
