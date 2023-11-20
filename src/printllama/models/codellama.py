@@ -56,8 +56,8 @@ class CodeLlama():
         output = self.model.generate(
             inputs["input_ids"],
             max_new_tokens=self.max_new_tokens,
-            top_p=0.9,
+            top_p=0.95,
             do_sample=True,
-            temperature=0.1,
+            temperature=0.5,
         )
         return self.tokenizer.decode(output[0])
