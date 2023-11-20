@@ -15,7 +15,7 @@ source /scr/jphilipp/miniconda3/etc/profile.d/conda.sh
 conda activate printllama
 
 # Set CUDA visible devices to use both GPUs
-export CUDA_VISIBLE_DEVICES=7
+export CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7
 
 # Change to the directory with your Python script
 cd ~/research_projects/printllama/experiments/apps

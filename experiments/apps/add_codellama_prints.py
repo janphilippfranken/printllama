@@ -77,7 +77,7 @@ def add_codellama_prints(args: argparse.Namespace, codellama: CodeLlama) -> None
     updated_items = []
 
     for i, item in enumerate(tqdm(ds)):
-        print(i)
+        print(i, args.n_items, args.n_prints)
         # Skip if CodeLlama outputs already exist in results dataset
         if any(item['problem_id'] == result['problem_id'] and 'codellama_print_statements' in result for result in ds_results):
             continue
