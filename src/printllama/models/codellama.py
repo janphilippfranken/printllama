@@ -3,6 +3,8 @@ from typing import List, Dict
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
+# from torch.nn import DataParallel
+
 
 class CodeLlama():
     """
@@ -19,7 +21,7 @@ class CodeLlama():
         max_new_tokens: int = 2000,
         ):
         """
-        Initializes AsyncAzureOpenAI client.
+        Initializes CodeLLama.
         """
         torch_dtype = torch.float16 if "16" in torch_dtype else torch.float32
 
@@ -35,6 +37,7 @@ class CodeLlama():
             cache_dir=model_cache_dir,
         )
 
+
         self.max_new_tokens = max_new_tokens
 
     @property
@@ -47,7 +50,14 @@ class CodeLlama():
         """
         Make a call.
         """
-        model_input = self.tokenizer(prompt, return_tensors="pt").to(self.model.device)
+        prompt = """def remove_non_ascii(s: str) -> str:
+<FILL_ME>
+    return result"""
+        print(prompt)
+        model_input = self.tokenizer(prompt, return_tensors="pt").to(self.model.device)["input_ids"]
         with torch.no_grad():
-            response = self.tokenizer.decode(self.model.generate(**model_input, max_new_tokens=self.max_new_tokens)[0], skip_special_tokens=True)
+            generated_ids = self.model.generate(model_input, max_new_tokens=self.max_new_tokens)
+            response = self.tokenizer.batch_decode(generated_ids[:, model_input.shape[1]:], skip_special_tokens = True)[0]
+            breakpoint()
+            # response = self.tokenizer.decode(self.model.generate(model_input, max_new_tokens=self.max_new_tokens)[0], skip_special_tokens=True)
         return response

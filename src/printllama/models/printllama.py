@@ -20,7 +20,7 @@ class PrintLlama():
         output_dir: str = "/scr/jphilipp/printllama-hgx/finetuned_hf_models/codellama_7b_hf",
         ):
         """
-        Initializes AsyncAzureOpenAI client.
+        Initializes the model.
         """
         torch_dtype = torch.float16 if "16" in torch_dtype else torch.float32
 
