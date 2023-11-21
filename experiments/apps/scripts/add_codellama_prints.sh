@@ -4,7 +4,7 @@
 #SBATCH --partition=cocoflops
 #SBATCH -w cocoflops-hgx-1
 #SBATCH --gres=gpu:1  # Requesting one GPU
-#SBATCH --mem=500G
+#SBATCH --mem=128G
 #SBATCH --cpus-per-task=32
 #SBATCH --time=24:00:00
 #SBATCH --output=job_output.%j.out
@@ -15,7 +15,7 @@ source /scr/jphilipp/miniconda3/etc/profile.d/conda.sh
 conda activate printllama
 
 # Set CUDA visible devices to use both GPUs
-export CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7
+# export CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7
 
 # Change to the directory with your Python script
 cd ~/research_projects/printllama/experiments/apps
