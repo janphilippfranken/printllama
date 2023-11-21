@@ -22,15 +22,20 @@ def generate_print_statements(question: str, faulty_solution: str, codellama: Co
     system = """You are an expert computer science reasearcher and programmer, especially skilled at debugging algorithms."""
 
     user = f"""I have to solve the following problem:
+
 {question}
+
 Here is my initial solution to the problem:
+
 ```python
 {faulty_solution}
 ```
 Insert print statements within in the initial solution that will help me debug and improve the program. 
 Be as creative as you can under the constraints. The return from your print statements must be helpful and non-trivial. 
-First, propose an idea, then implement it. Return the full initial solution as it is including your added print statemetns (within the solution)."""
-    
+First, propose an idea, then implement it. 
+
+Important: Return the full initial solution as it is including your added print statemetns (within the solution). Do not return any other code.
+Do not change any of the code in the intitial solution, only add helpful print statements."""
     prompt = f"<s>{B_INST} {B_SYS}{system}{E_SYS}{user} {E_INST}"
     codellama_prints = []
     codellama_responses = []
@@ -45,6 +50,7 @@ First, propose an idea, then implement it. Return the full initial solution as i
             print(f"Error in generating print statement, appending failed statement to list.")
             codellama_prints.append("Failed to generate print statement.")
             codellama_responses.append("Failed to generate print statement.")
+    print(codellama_prints)
     return codellama_prints, codellama_responses
 
 
@@ -79,11 +85,11 @@ def add_codellama_prints(args: argparse.Namespace, codellama: CodeLlama) -> None
     for i, item in enumerate(tqdm(ds)):
         print(i, args.n_items, args.n_prints)
         # Skip if CodeLlama outputs already exist in results dataset
-        if any(item['problem_id'] == result['problem_id'] and 'codellama_print_statements' in result for result in ds_results):
-            continue
+        # if any(item['problem_id'] == result['problem_id'] and 'codellama_print_statements' in result for result in ds_results):
+            # continue
 
         question = item['question']
-        faulty_solution = item['faulty_solutions'][0]
+        faulty_solution = item['faulty_solutions']
         codellama_prints, codellama_responses = generate_print_statements(question, faulty_solution, codellama, args.n_prints)
         item['codellama_print_statements'] = codellama_prints
         item['codellama_responses'] = codellama_responses
@@ -101,7 +107,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Process dataset items by adding CodeLlama-generated print statements.")
     parser.add_argument("--dataset_path_load", type=str, default="../../data/apps_100_llama.json", help="Path to the dataset file.")
     parser.add_argument("--dataset_path_save", type=str, default="../../data/apps_100_llama_prints_10_per_item.json", help="Path to save the updated dataset file.")
-    parser.add_argument("--n_prints", type=int, default=10, help="Number of prints to add.")
+    parser.add_argument("--n_prints", type=int, default=1, help="Number of prints to add.")
     parser.add_argument("--timeout", type=int, default=10, help="Timeout for solution evaluation.")
     parser.add_argument("--debug", action="store_true", help="Enable debug mode.")
     parser.add_argument("--n_items", type=int, default=100, help="Number of items to corrupt.")
