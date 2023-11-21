@@ -106,7 +106,7 @@ def main() -> None:
     # Dataset args
     parser = argparse.ArgumentParser(description="Process dataset items by adding CodeLlama-generated print statements.")
     parser.add_argument("--dataset_path_load", type=str, default="../../data/apps_100_llama.json", help="Path to the dataset file.")
-    parser.add_argument("--dataset_path_save", type=str, default="../../data/apps_100_llama_prints_10_per_item.json", help="Path to save the updated dataset file.")
+    parser.add_argument("--dataset_path_save", type=str, default="../../data/apps_100_llama_prints_1_per_item.json", help="Path to save the updated dataset file.")
     parser.add_argument("--n_prints", type=int, default=1, help="Number of prints to add.")
     parser.add_argument("--timeout", type=int, default=10, help="Timeout for solution evaluation.")
     parser.add_argument("--debug", action="store_true", help="Enable debug mode.")
