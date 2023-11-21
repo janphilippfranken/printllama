@@ -51,7 +51,7 @@ def baseline_repair_solutions(
     language_model,
 ) -> List[str]:
     """
-    Improves a solution to a question. If budget > 1, uses a batch response for a single solution.
+    Improves a solution to a question. Submits a batch request.
     """
     system_message = "You are an expert computer science reasearcher and programmer, especially skilled at optimizing algorithms."
     human_messages = []
@@ -62,6 +62,43 @@ and its faulty solution:
 ```python
 {solution}
 ```
+Return an improved (correct) solution. Be as creative as you can under the constraints.
+Your primary improvement must be novel and non-trivial. First, propose an idea, then implement it."""
+        human_messages.append(human_message)
+    improved_solutions = language_model.batch_prompt(system_message, human_messages)
+    improved_solutions = extract_code(improved_solutions)
+
+    return improved_solutions
+
+def print_repair_solutions(
+    questions,
+    solutions, 
+    print_solutions,
+    print_returns,
+    language_model,
+) -> List[str]:
+    """
+    Improves a solution to a question given prints. Submits a batch request.
+    """
+    system_message = "You are an expert computer science reasearcher and programmer, especially skilled at optimizing algorithms."
+    human_messages = []
+    for question, solution, print_solution, print_return, in zip(questions, solutions, print_solutions, print_returns):
+        human_message = f"""You are given this programming question:
+{question}
+and its faulty solution:
+```python
+{solution}
+```
+
+To improve this solution, consider the following print statements used for debugging:
+```python
+{print_solution}
+```
+The output from these print statements was:
+```
+{print_return}
+```
+
 Return an improved (correct) solution. Be as creative as you can under the constraints.
 Your primary improvement must be novel and non-trivial. First, propose an idea, then implement it."""
         human_messages.append(human_message)
