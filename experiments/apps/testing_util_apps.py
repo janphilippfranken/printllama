@@ -1,4 +1,7 @@
-"""From https://github.com/hendrycks/apps/blob/main/eval/testing_util.py"""
+"""Adapted from https://github.com/hendrycks/apps/blob/main/eval/testing_util.py"""
+import contextlib
+
+
 import argparse
 import json
 import os
@@ -143,6 +146,7 @@ def run_test(test, in_outs, debug):
     reliability_guard()
         
     results = []
+    print_outputs = []
     sol = "import sys\nimport time\nimport itertools\nfrom itertools import accumulate, product, permutations, combinations\nimport collections\nfrom collections import Counter, OrderedDict, deque, defaultdict, ChainMap\nfrom functools import lru_cache\nimport math\nfrom math import sqrt, sin, cos, tan, ceil, fabs, floor, gcd, exp, log, log2\nimport fractions\nfrom typing import List, Tuple\nimport numpy as np\nimport random\nimport heapq\nfrom heapq import *\n"
     if debug:
         print(f"loading test code = {datetime.now().time()}")

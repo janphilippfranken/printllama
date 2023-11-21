@@ -23,6 +23,39 @@ and problem-solving for students. The new incorrect solution must be wrong and h
 
     return faulty_solutions
 
+def format_raw_solutions(
+    solutions: List[str], 
+    input_values: List[str],
+    language_model,
+) -> List[str]:
+    """
+    Formats a solution to make it easier to test it.
+    """
+    system_message = "You are an expert computer science educator and programmer, especially skilled at designing algorithms."
+    human_messages = []
+    for solution, input_value in zip(solutions, input_values):
+        input_value = input_value.replace("\n", "\\n")
+        human_message = f"""You are given the following solution to a coding problem.
+{solution}
+```
+An example input for testing the solution is:
+{input_value}
+
+Reformat the provided coding solution into a Python function named solution_algorithm() which takes input_values as its only parameter. This parameter will be a string with line breaks, like '3 3 7 5\\n0 0 4 6\\n0 0 7 4\\n', indicating the required inputs.
+
+1. Integrate the original solution into solution_algorithm() without any modifications.
+2. Ensure solution_algorithm() processes input_values, splitting it by line breaks and formatting each line correctly (e.g., converting to integers or strings as needed).
+3. Handle any user inputs or interactive components within solution_algorithm().
+4. Do NOT include any comments in solution_algorithm() (e.g., # this is a comment) or change anything else in the original solution.
+
+All that should remain to be done after your edits is calling solution_algorithm() with input_values as its only parameter and getting the return that we have gotten from the original solution."""
+        
+        human_messages.append(human_message)
+    formatted_solutions = language_model.batch_prompt(system_message, human_messages)
+    formatted_solutions = extract_code(formatted_solutions)
+
+    return formatted_solutions
+
 def generate_faulty_solutions(
     solutions: List[str], 
     language_model,
