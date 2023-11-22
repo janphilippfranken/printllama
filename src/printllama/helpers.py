@@ -127,7 +127,7 @@ def evaluate_solutions(
         input_output_pairs,
 ) -> Tuple[float, List[str], List[str]]:
     """Evaluate solutions."""
-    results, print_outputs, error_messages = [], [], []    
+    results, print_outputs, error_messages = [], [], []   
     try:
         exec(solution, globals())
         for input, output in zip(input_output_pairs['inputs'], input_output_pairs['outputs']):

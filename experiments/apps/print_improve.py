@@ -19,58 +19,90 @@ from printllama.helpers import evaluate_solutions, merge_datasets
 
 from gpt4_prompts import print_repair_solutions
 
+import logging
+# logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+
+
 
 def evaluate_solutions_wrapper(solution, input_output_pairs, return_queue):
-    try:
+    try:    
         result = evaluate_solutions(solution, input_output_pairs)
         return_queue.put(result)
     except Exception as e:
         return_queue.put(e)
+
+
 
 def call_evaluate_solutions_with_timeout(solution, input_output_pairs, timeout=1):
     return_queue = multiprocessing.Queue()
     process = multiprocessing.Process(target=evaluate_solutions_wrapper, args=(solution, input_output_pairs, return_queue))
     process.start()
     process.join(timeout=timeout)
+    
     if process.is_alive():
         process.terminate()
         process.join()
         return (0, 0, [], ["Timeout or resource limit exceeded"])
     try:
-        return return_queue.get_nowait()
+        return return_queue.get(timeout=2)
     except queue.Empty:
         return (0, 0, [], ["No output from evaluate_solutions"])
 
-def process_batch(questions, faulty_solutions, print_solutions, gpt4_repair, start_index, ds) -> List:
 
-    breakpoint()
-    print_returns = []
-    for print_solution in print_solutions:
+def process_batch(args, questions, faulty_solutions, print_solutions, gpt4_repair, start_index, ds) -> List:
+
+    print_returns_accuracy = []
+    print_returns_deterministic_accuracy = []
+    print_returns_prints = []
+    print_returns_errors = []
+
+    current_item = ds[start_index]
+    input_output_pairs = eval(current_item['input_output'])
+    
+    for print_solution in print_solutions[0][:args.budget]:
         try:
-            exec(print_solution, globals())
-            print_return = call_evaluate_solutions_with_timeout([print_solution], input_output_pairs, timeout=1)
-            print_returns.append(print_return[2][0])
-        except Exception as e:
-            print_returns.append(["Error in executing solution: {e}"])
+            print_return = call_evaluate_solutions_with_timeout(print_solution[0], input_output_pairs, timeout=5)
+            print_return_accuracy, print_return_deterministic_accuracy, print_return_prints, print_return_errors = print_return
 
-    print_repaired_batch = print_repair_solutions(questions, print_solutions, print_returns, faulty_solutions, gpt4_repair)
+            print_returns_accuracy.append(print_return_accuracy)
+            print_returns_deterministic_accuracy.append(print_return_deterministic_accuracy)
+            print_returns_prints.append(print_return_prints)
+            print_returns_errors.append(print_return_errors)
+        except Exception as e:
+            print_returns_accuracy.append(0)
+            print_returns_deterministic_accuracy.append(0)
+            print_returns_prints.append([])
+            print_returns_errors.append([str(e)])
+
+    print_solutions_flat = [psol for lsol in print_solutions[0][:args.budget] for psol in lsol]
+
+    print_repaired_batch = print_repair_solutions(questions[0], input_output_pairs, print_solutions_flat, print_returns_prints, faulty_solutions, gpt4_repair)
+   
 
     updated_items = []
+    print_repairs_accuracy = []
+    print_repairs_deterministic_accuracy = []
+    print_repairs_prints = []
+    print_repairs_errors = []
 
-    for j, print_repair_solution in enumerate(print_repaired_batch):
-        current_item = ds[start_index + j]
-        input_output_pairs = eval(current_item['input_output'])
-
-    
-        print_repaired_results = call_evaluate_solutions_with_timeout(print_repair_solution, input_output_pairs, timeout=1)
+    for print_repair_solution in print_repaired_batch:
+        print_repaired_results = call_evaluate_solutions_with_timeout(print_repair_solution, input_output_pairs, timeout=5)
         print_repair_accuracy, print_repair_deterministic_accuracy, print_repair_prints, print_repair_errors = print_repaired_results
+        print_repairs_accuracy.append(print_repair_accuracy)
+        print_repairs_deterministic_accuracy.append(print_repair_deterministic_accuracy)
+        print_repairs_prints.append(print_repair_prints)
+        print_repairs_errors.append(print_repair_errors)
 
-        current_item['print_repair_accuracy'] = print_repair_accuracy
-        current_item['print_repair_deterministic_accuracy'] = print_repair_deterministic_accuracy
-        current_item['print_repair_prints'] = print_repair_prints
-        current_item['print_repair_errors'] = print_repair_errors
-        
-        updated_items.append(current_item)
+    current_item['print_repairs_accuracy'] = print_repairs_accuracy
+    current_item['print_repairs_deterministic_accuracy'] = print_repairs_deterministic_accuracy
+    current_item['print_repairs_prints'] = print_repairs_prints
+    current_item['print_repairs_errors'] = print_repairs_errors
+    current_item['print_returns_accuracy'] = print_returns_accuracy
+    current_item['print_returns_deterministic_accuracy'] = print_returns_deterministic_accuracy
+    current_item['print_returns_prints'] = print_returns_prints
+    current_item['print_returns_errors'] = print_returns_errors
+    
+    updated_items.append(current_item)
 
     return updated_items
 
@@ -100,23 +132,22 @@ def format_dataset(args, gpt4_format, gpt4_corrupt, gpt4_repair):
         questions.append(item['question'])
         solutions.append(item['correct_solution'])
         faulty_solutions.append(item['faulty_solutions'])
-        # print_solutions.append(item['codellama_prints_13b'])
+        print_solutions.append(item['codellama_prints_7b'])
  
-
-        if len(solutions) == args.budget or i == len(ds) - 1:
-            # Process the batch
-            updated_items = process_batch(questions=questions,
-                                          solutions=solutions,
-                                          faulty_solutions=faulty_solutions,
-                                          print_solutions=print_solutions,
-                                          gpt4_repair=gpt4_repair,
-                                          start_index=i - args.budget + 1, 
-                                          ds=ds)
-            # Merge the updated items into the results dataset
-            ds_results = merge_datasets(ds_results, updated_items)
-            # Reset the batch
-            questions = []
-            solutions = []
+      
+        # Process the batch
+        updated_items = process_batch(args=args,
+                                        questions=questions,
+                                        faulty_solutions=faulty_solutions,
+                                        print_solutions=print_solutions,
+                                        gpt4_repair=gpt4_repair,
+                                        start_index=i,
+                                        ds=ds)
+        # Merge the updated items into the results dataset
+        ds_results = merge_datasets(ds_results, updated_items)
+        # Reset the batch
+        questions = []
+        solutions = []
  
 
         # Convert the list back to a dataset and save
@@ -128,9 +159,9 @@ def format_dataset(args, gpt4_format, gpt4_corrupt, gpt4_repair):
 
 def main():
     parser = argparse.ArgumentParser(description="Process dataset items by adding faulty solutions.")
-    parser.add_argument("--dataset_path_load", type=str, default="../../data/apps_intro_test.json", help="Path to the dataset file.")
-    parser.add_argument("--dataset_path_save", type=str, default="../../data/apps_intro_test_baseline.json", help="Path to the dataset file.")
-    parser.add_argument("--timeout", type=int, default=10, help="Timeout for solution evaluation.")
+    parser.add_argument("--dataset_path_load", type=str, default="../../data/apps_intro_test_codellama.json", help="Path to the dataset file.")
+    parser.add_argument("--dataset_path_save", type=str, default="../../data/apps_intro_test_printllama_0.json", help="Path to the dataset file.")
+    parser.add_argument("--timeout", type=int, default=1, help="Timeout for solution evaluation.")
     parser.add_argument("--n_items", type=int, default=100, help="Number of items to corrupt.")
 
     # LLM Arguments 

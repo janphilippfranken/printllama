@@ -115,18 +115,20 @@ Make sure that the code is running if solution_algorithm(input_value) is called 
     return improved_solutions
 
 def print_repair_solutions(
-    questions,
+    question,
+    input_output_pairs,
     print_statements,
     print_returns,
-    solutions, 
+    solution, 
     language_model,
+    max_chars=200,
 ) -> List[str]:
     """
     Improves a solution to an AAPS question. 
     """
     system_message = "You are an expert computer science reasearcher and programmer, especially skilled at optimizing algorithms."
     human_messages = []
-    for question, solution, print_statement, print_return in zip(questions, solutions, print_statements, print_returns):
+    for print_statement, print_return in zip(print_statements, print_returns):
         human_message = f"""Given this programming question:
 {question}
 and its faulty solution:
@@ -144,17 +146,18 @@ Return the correct solution using this format:
 Make sure that the code is running if solution_algorithm(input_value) is called with the correct input and returns it. Do not use external libraries such as multiprocessing and make sure the algorithm runs within milliseconds.
 
 
-HINT: I have already tried debugging the solution and inserted the following print statements:
+HINT: I have already tried debugging the solution and inserted the following print statements when testing the algorithm on the input {input_output_pairs['inputs'][0]}:
 ```python
 {print_statement}
 ```
 
-The output of the print statements is:
+The output of the print statements (if any) is:
 ```python
-{print_return}
+{print_return[0][:max_chars] if print_return else "No output was generated."}
 ```
 
-You might find these print statements to make the solution better."""
+You should use these print statements to make the solution even better."""
+        print(len(human_message))
         human_messages.append(human_message)
     improved_solutions = language_model.batch_prompt(system_message, human_messages)
     improved_solutions = extract_code(improved_solutions)
