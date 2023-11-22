@@ -1,6 +1,7 @@
-from typing import List
+from typing import List, Dict
 
 from printllama.helpers import extract_code
+
 
 def format_raw_solutions(
     solutions: List[str], 
@@ -40,6 +41,7 @@ All that should remain to be done after your edits is calling solution_algorithm
     formatted_solutions = extract_code(formatted_solutions)
     
     return formatted_solutions
+
 
 def generate_faulty_solutions(
     solutions: List[str], 
@@ -82,9 +84,10 @@ Note: You can not change the name of the solution_algorithm() function or its in
 
     return faulty_solutions
 
+
 def baseline_repair_solutions(
-    questions,
-    solutions, 
+    questions: List[str],
+    solutions: List[str],
     language_model,
 ) -> List[str]:
     """
@@ -114,12 +117,13 @@ Make sure that the code is running if solution_algorithm(input_value) is called 
 
     return improved_solutions
 
+
 def print_repair_solutions(
-    question,
-    input_output_pairs,
-    print_statements,
-    print_returns,
-    solution, 
+    question: str,
+    input_output_pairs: Dict[str, List[str]],
+    print_statements: List[str],
+    print_returns: List[str],
+    solution: str,
     language_model,
     max_chars=1000,
 ) -> List[str]:

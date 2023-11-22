@@ -1,24 +1,33 @@
 import argparse
-import json
-from datasets import load_dataset
+import os
+from typing import List, Tuple
+from datasets import load_dataset, Dataset
+import pandas as pd
 from tqdm import tqdm
-from typing import List, Dict, Any
 
 from printllama.models.codellama import CodeLlama
 from printllama.helpers import extract_code, extract_assistant_completion, merge_datasets
 
-from datasets import Dataset
-import pandas as pd
-
-import os
-
 B_INST, E_INST = "[INST]", "[/INST]"
 B_SYS, E_SYS = "<<SYS>>\n", "\n<</SYS>>\n\n"
 
-def generate_print_statements(question: str, faulty_solution: str, codellama: CodeLlama, n_prints: int) -> List[str]:
-    """Generate print statements for debugging a given solution."""
-    
-    
+def generate_print_statements(
+    question: str,
+    faulty_solution: str,
+    codellama: CodeLlama,
+    n_prints: int
+) -> Tuple[List[str], List[str]]:
+    """Generate print statements for debugging a given solution using CodeLlama.
+
+    Args:
+        question: The problem statement.
+        faulty_solution: The solution that needs debugging.
+        codellama: An instance of the CodeLlama model.
+        n_prints: Number of print statements to generate.
+
+    Returns:
+        A tuple containing two lists: one for the generated print statements and one for the responses.
+    """
     system = """You are an expert computer science reasearcher and programmer, especially skilled at debugging algorithms."""
 
     user = f"""I have to solve the following problem:
@@ -53,7 +62,11 @@ Do not change any of the code in the intitial solution, only add helpful print s
     print(codellama_prints)
     return codellama_prints, codellama_responses
 
-def add_codellama_prints(args: argparse.Namespace, codellama: CodeLlama) -> None:
+
+def add_codellama_prints(
+    args: argparse.Namespace, 
+    codellama: CodeLlama,
+) -> None:
     ds = load_dataset('json', data_files=args.dataset_path_load)['train'].select(range(args.n_items))
 
     # Load or initialize the results dataset
@@ -66,7 +79,6 @@ def add_codellama_prints(args: argparse.Namespace, codellama: CodeLlama) -> None
 
     for i, item in enumerate(tqdm(ds)):
         print(i, args.n_items, args.n_prints)
-        # Skip if CodeLlama outputs already exist in results dataset
         if any(item['problem_id'] == result['problem_id'] and 'codellama_prints' in result for result in ds_results):
             continue
 
@@ -77,15 +89,13 @@ def add_codellama_prints(args: argparse.Namespace, codellama: CodeLlama) -> None
         item['codellama_responses_7b'] = codellama_responses
         updated_items.append(item)
 
-        # Merge the updated item into the results dataset
         ds_results = merge_datasets(ds_results, [item])
 
-        # Convert the list back to a dataset and save after each item
         updated_dataset = Dataset.from_pandas(pd.DataFrame(ds_results))
         updated_dataset.to_json(args.dataset_path_save)
 
+
 def main() -> None:
-    # Dataset args
     parser = argparse.ArgumentParser(description="Process dataset items by adding CodeLlama-generated print statements.")
     parser.add_argument("--dataset_path_load", type=str, default="../../data/apps_intro_test_baseline.json", help="Path to the dataset file.")
     parser.add_argument("--dataset_path_save", type=str, default="../../data/apps_intro_test_codellama.json", help="Path to save the updated dataset file.")
@@ -94,7 +104,6 @@ def main() -> None:
     parser.add_argument("--debug", action="store_true", help="Enable debug mode.")
     parser.add_argument("--n_items", type=int, default=100, help="Number of items to corrupt.")
 
-    # Llama args
     parser.add_argument("--pretrained_model_name_or_path", type=str, default="codellama/CodeLlama-7b-Instruct-hf")
     parser.add_argument("--load_in_8bit", type=str, default=False)
     parser.add_argument("--device_map", type=str, default="auto")
