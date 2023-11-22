@@ -73,8 +73,8 @@ def add_codellama_prints(args: argparse.Namespace, codellama: CodeLlama) -> None
         question = item['question']
         faulty_solution = item['faulty_solutions']
         codellama_prints, codellama_responses = generate_print_statements(question, faulty_solution, codellama, args.n_prints)
-        item['codellama_prints_13b'] = codellama_prints
-        item['codellama_responses_13b'] = codellama_responses
+        item['codellama_prints_7b'] = codellama_prints
+        item['codellama_responses_7b'] = codellama_responses
         updated_items.append(item)
 
         # Merge the updated item into the results dataset
@@ -89,13 +89,13 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Process dataset items by adding CodeLlama-generated print statements.")
     parser.add_argument("--dataset_path_load", type=str, default="../../data/apps_intro_test_baseline.json", help="Path to the dataset file.")
     parser.add_argument("--dataset_path_save", type=str, default="../../data/apps_intro_test_codellama.json", help="Path to save the updated dataset file.")
-    parser.add_argument("--n_prints", type=int, default=1, help="Number of prints to add.")
+    parser.add_argument("--n_prints", type=int, default=10, help="Number of prints to add.")
     parser.add_argument("--timeout", type=int, default=10, help="Timeout for solution evaluation.")
     parser.add_argument("--debug", action="store_true", help="Enable debug mode.")
-    parser.add_argument("--n_items", type=int, default=20, help="Number of items to corrupt.")
+    parser.add_argument("--n_items", type=int, default=100, help="Number of items to corrupt.")
 
     # Llama args
-    parser.add_argument("--pretrained_model_name_or_path", type=str, default="codellama/CodeLlama-13b-Instruct-hf")
+    parser.add_argument("--pretrained_model_name_or_path", type=str, default="codellama/CodeLlama-7b-Instruct-hf")
     parser.add_argument("--load_in_8bit", type=str, default=False)
     parser.add_argument("--device_map", type=str, default="auto")
     parser.add_argument("--torch_dtype", type=str, default="float16")
