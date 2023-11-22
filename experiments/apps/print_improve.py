@@ -15,10 +15,9 @@ import queue
 from printllama.models.azure import AsyncAzureChatLLM
 from printllama.models.gpt4 import GPT4Agent
 
-from printllama.helpers import evaluate_solutions, merge_datasets, remove_comments
+from printllama.helpers import evaluate_solutions, merge_datasets
 
-from gpt4_prompts import format_raw_solutions, generate_faulty_solutions, baseline_repair_solutions
-
+from gpt4_prompts import print_repair_solutions
 
 
 def evaluate_solutions_wrapper(solution, input_output_pairs, return_queue):
@@ -42,42 +41,35 @@ def call_evaluate_solutions_with_timeout(solution, input_output_pairs, timeout=1
     except queue.Empty:
         return (0, 0, [], ["No output from evaluate_solutions"])
 
-def process_batch(questions, solutions, input_values, output_values, gpt4_format, gpt4_corrupt, gpt4_repair, start_index, ds) -> List:
-    formatted_solutions_batch = format_raw_solutions(solutions, input_values, gpt4_format)
-    faulty_solutions_batch = generate_faulty_solutions(formatted_solutions_batch, input_values, output_values, gpt4_corrupt)
-    faulty_solutions_batch = [remove_comments(solution) for solution in faulty_solutions_batch]
-    baseline_repaired_batch = baseline_repair_solutions(questions, faulty_solutions_batch, gpt4_repair)
+def process_batch(questions, faulty_solutions, print_solutions, gpt4_repair, start_index, ds) -> List:
+
+    breakpoint()
+    print_returns = []
+    for print_solution in print_solutions:
+        try:
+            exec(print_solution, globals())
+            print_return = call_evaluate_solutions_with_timeout([print_solution], input_output_pairs, timeout=1)
+            print_returns.append(print_return[2][0])
+        except Exception as e:
+            print_returns.append(["Error in executing solution: {e}"])
+
+    print_repaired_batch = print_repair_solutions(questions, print_solutions, print_returns, faulty_solutions, gpt4_repair)
 
     updated_items = []
 
-    for j, (formatted_solution, faulty_solution, repaired_solution) in enumerate(zip(formatted_solutions_batch, faulty_solutions_batch, baseline_repaired_batch)):
+    for j, print_repair_solution in enumerate(print_repaired_batch):
         current_item = ds[start_index + j]
         input_output_pairs = eval(current_item['input_output'])
 
-        formatted_results = call_evaluate_solutions_with_timeout(formatted_solution, input_output_pairs, timeout=1)
-        faulty_results = call_evaluate_solutions_with_timeout(faulty_solution, input_output_pairs, timeout=1)
-        repaired_results = call_evaluate_solutions_with_timeout(repaired_solution, input_output_pairs, timeout=1)
+    
+        print_repaired_results = call_evaluate_solutions_with_timeout(print_repair_solution, input_output_pairs, timeout=1)
+        print_repair_accuracy, print_repair_deterministic_accuracy, print_repair_prints, print_repair_errors = print_repaired_results
 
-        formatted_accuracy, formatted_deterministic_accuracy, formatted_prints, formatted_errors = formatted_results
-        faulty_accuracy, faulty_deterministic_accuracy, faulty_prints, faulty_errors = faulty_results
-        repaired_accuracy, repaired_deterministic_accuracy, repaired_prints, repaired_errors = repaired_results
-
-        current_item['formatted_solution_accuracy'] = formatted_accuracy
-        current_item['faulty_solution_accuracy'] = faulty_accuracy
-        current_item['repaired_solution_accuracy'] = repaired_accuracy
-        current_item['formatted_solution_deterministic_accuracy'] = formatted_deterministic_accuracy
-        current_item['faulty_solution_deterministic_accuracy'] = faulty_deterministic_accuracy
-        current_item['repaired_solution_deterministic_accuracy'] = repaired_deterministic_accuracy
-        current_item['formatted_solutions'] = formatted_solution
-        current_item['faulty_solutions'] = faulty_solution
-        current_item['repaired_solutions'] = repaired_solution
-        current_item['formatted_print_outputs'] = formatted_prints
-        current_item['faulty_print_outputs'] = faulty_prints
-        current_item['repaired_print_outputs'] = repaired_prints
-        current_item['formatted_errors'] = formatted_errors
-        current_item['faulty_errors'] = faulty_errors
-        current_item['repaired_errors'] = repaired_errors
-
+        current_item['print_repair_accuracy'] = print_repair_accuracy
+        current_item['print_repair_deterministic_accuracy'] = print_repair_deterministic_accuracy
+        current_item['print_repair_prints'] = print_repair_prints
+        current_item['print_repair_errors'] = print_repair_errors
+        
         updated_items.append(current_item)
 
     return updated_items
@@ -96,8 +88,8 @@ def format_dataset(args, gpt4_format, gpt4_corrupt, gpt4_repair):
 
     questions = []
     solutions = []
-    input_values = []
-    output_values = []
+    faulty_solutions = []
+    print_solutions = []
 
     for i, item in enumerate(tqdm(ds)):
         # Skip if already in results dataset
@@ -107,17 +99,16 @@ def format_dataset(args, gpt4_format, gpt4_corrupt, gpt4_repair):
         
         questions.append(item['question'])
         solutions.append(item['correct_solution'])
-        input_values.append(item['input_output'])
-        output_values.append(item['input_output'])
+        faulty_solutions.append(item['faulty_solutions'])
+        # print_solutions.append(item['codellama_prints_13b'])
+ 
 
         if len(solutions) == args.budget or i == len(ds) - 1:
             # Process the batch
             updated_items = process_batch(questions=questions,
                                           solutions=solutions,
-                                          input_values=input_values,
-                                          output_values=output_values,
-                                          gpt4_format=gpt4_format,
-                                          gpt4_corrupt=gpt4_corrupt,
+                                          faulty_solutions=faulty_solutions,
+                                          print_solutions=print_solutions,
                                           gpt4_repair=gpt4_repair,
                                           start_index=i - args.budget + 1, 
                                           ds=ds)
@@ -126,8 +117,7 @@ def format_dataset(args, gpt4_format, gpt4_corrupt, gpt4_repair):
             # Reset the batch
             questions = []
             solutions = []
-            input_values = []
-            output_values = []
+ 
 
         # Convert the list back to a dataset and save
         print(gpt4_format.total_inference_cost)

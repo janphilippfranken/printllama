@@ -1,5 +1,12 @@
-from typing import List
+from typing import List, Tuple
+
+import io
+import contextlib
 import re
+
+import threading
+from tqdm import tqdm
+
 
 def extract_code(algorithm_strs: List[str]) -> List[str]:
     """Extract code from algorithm string."""
@@ -34,82 +41,22 @@ def extract_assistant_completion(completion: str) -> str:
         return ""  # Returns an empty string if the end tag is not found
 
 
-def insert_prints_with_printllama(
-    prompts, 
-    printllama
-    ) -> List[str]:
-    """
-    Inserts print statements using printllama peft adapter.
-    """
-    solutions = []
-    for prompt in prompts:
-        solutions.append(printllama(prompt))
-    modified_solutions = extract_code(solutions)
-    return modified_solutions
+def merge_datasets(
+    original, 
+    updates, 
+    problem_id_key='problem_id',
+) -> List[dict]:
+    """Merge datasets."""
+    original_list = [item for item in original]
+    update_ids = {item[problem_id_key]: item for item in updates}
+    for i, item in enumerate(original_list):
+        if item[problem_id_key] in update_ids:
+            original_list[i].update(update_ids[item[problem_id_key]])
+    for item in updates:
+        if item[problem_id_key] not in [original_item[problem_id_key] for original_item in original_list]:
+            original_list.append(item)
+    return original_list
 
-def insert_prints_with_codellama(
-    prompts, 
-    codellama
-    ) -> List[str]:
-    """
-    Inserts print statements using codellama base model.
-    """
-    solutions = []
-    for prompt in prompts:
-        solutions.append(codellama(prompt))
-    modified_solutions = extract_code(solutions)
-    return modified_solutions
-
-def insert_prints_with_gpt4(
-    initial_solution, 
-    gpt4) -> List[str]:
-    """
-    Inserts print statements using azure gpt4.
-    """
-    system_message = "You are an expert computer science researcher and programmer, especially skilled at debugging algorithms."
-
-    human_message = f"""You are given the following Python program:
-```python
-{initial_solution}
-```
-Insert print statements in the program that will help me debug and improve the program."""
-    solutions = gpt4.batch_prompt(system_message, [human_message] * gpt4.budget)        
-    modified_solutions = extract_code(solutions)
-
-    return modified_solutions
-
-def repair_code_with_gpt4_and_prints(
-    problem_description: str,
-    initial_solution: str, 
-    print_solution: str,
-    prints: List[str],
-    gpt4) -> List[str]:
-    """
-    Repair statements using azure gpt4.
-    """
-    system_message = "You are an expert computer science researcher and programmer, especially skilled at repairing algorithms."
-
-    human_message = f"""I have to solve the following problem:
-
-{problem_description}
-
-Here is my initial solution to the problem:
-```python
-{initial_solution}
-```
-I have inserted the following print statements to debug the program:
-```python
-{print_solution}
-```
-Which have resulted in the following output:
-```python
-{prints}
-```
-Using the information from the print statements, please improve my solution. Do not include print statements in the improved solution."""
-    solutions = gpt4.batch_prompt(system_message, [human_message] * gpt4.budget)        
-    modified_solutions = extract_code(solutions)
-
-    return modified_solutions
 
 def format_llama_message(
         system_message: str, 
@@ -127,6 +74,7 @@ def format_llama_message(
 {human_message} [/INST] {assistant_message}""".format(system_message=system_message, 
                                                       human_message=human_message, 
                                                       assistant_message=assistant_message)
+
 
 def get_llama_messages(
     problem_description: str,
@@ -149,6 +97,7 @@ Insert print statements in the program that will help me debug and improve the p
     assistant_message = f"""{assistant_response}"""
     return system_message, human_message, assistant_message
 
+
 def tokenize_fn(
     text,
     tokenizer,
@@ -158,6 +107,7 @@ def tokenize_fn(
     truncation: bool = True,
     ignore_index: bool = False,
     ):
+    """Simple LLama tokenize function."""
     result = tokenizer(
         text,
         truncation=truncation,
@@ -170,3 +120,50 @@ def tokenize_fn(
     else:
         result["labels"] = result["input_ids"].copy()
     return result
+
+
+def evaluate_solutions(
+        solution,
+        input_output_pairs,
+) -> Tuple[float, List[str], List[str]]:
+    """Evaluate solutions."""
+    results, print_outputs, error_messages = [], [], []    
+    try:
+        exec(solution, globals())
+        for input, output in zip(input_output_pairs['inputs'], input_output_pairs['outputs']):
+            with io.StringIO() as buf, contextlib.redirect_stdout(buf):
+                try:
+                    result = solution_algorithm(input)
+                    results.append(compare_outputs(result, output))
+                except Exception as e:
+                    results.append(False)
+                    error_messages.append(str(e))
+                print_outputs.append(buf.getvalue())
+    except Exception as e:
+        error_messages.append(f"Error in executing solution: {e}")
+        print_outputs.append("")
+
+    accuracy = sum(1 for r in results if r == True) / len(results) if results else 0.0
+    deterministic_accuracy = 1 if sum(results) == len(results) else 0
+    return accuracy, deterministic_accuracy,print_outputs, error_messages
+
+
+def compare_outputs(
+    actual: Tuple[int, ...], 
+    expected: str,
+) -> bool:
+    """Compare outputs."""
+    expected_normalized = expected.strip().split()
+    if isinstance(actual, (tuple, list)):
+        actual_normalized = [str(item) for item in actual]
+    else:
+        actual_normalized = [str(actual)]
+
+    return actual_normalized == expected_normalized
+
+def remove_comments(
+    code: str,
+) -> str:
+    """Remove comments from code."""
+    code_without_comments = re.sub(r'#.*', '', code)
+    return code_without_comments
