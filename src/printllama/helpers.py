@@ -67,11 +67,11 @@ def format_llama_message(
         https://huggingface.co/datasets/mlabonne/guanaco-llama2-1k
         https://mlabonne.github.io/blog/posts/Fine_Tune_Your_Own_Llama_2_Model_in_a_Colab_Notebook.html).
     """
-    return """[INST] <<SYS>>
+    return """<s>[INST] <<SYS>>
 {system_message}
 <</SYS>>
 
-{human_message} [/INST] {assistant_message}""".format(system_message=system_message, 
+{human_message} [/INST] {assistant_message}</s>""".format(system_message=system_message, 
                                                       human_message=human_message, 
                                                       assistant_message=assistant_message)
 

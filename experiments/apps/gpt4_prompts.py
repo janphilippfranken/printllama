@@ -121,7 +121,7 @@ def print_repair_solutions(
     print_returns,
     solution, 
     language_model,
-    max_chars=200,
+    max_chars=1000,
 ) -> List[str]:
     """
     Improves a solution to an AAPS question. 
@@ -158,7 +158,7 @@ The output of the print statements (if any) is:
 
 You should use these print statements to make the solution even better."""
         print(len(human_message))
-        human_messages.append(human_message)
+        human_messages.append(human_message[:15000])
     improved_solutions = language_model.batch_prompt(system_message, human_messages)
     improved_solutions = extract_code(improved_solutions)
 
