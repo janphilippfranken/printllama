@@ -99,8 +99,8 @@ def main() -> None:
     parser.add_argument("--load_in_8bit", type=str, default=False)
     parser.add_argument("--device_map", type=str, default="auto")
     parser.add_argument("--torch_dtype", type=str, default="float16")
-    parser.add_argument("--model_cache_dir", type=str, default="/scr/jphilipp/printllama-hgx/pretrained_hf_models/codellama_13b_instruct_hf")
-    parser.add_argument("--tokenizer_cache_dir", type=str, default="/scr/jphilipp/printllama-hgx/pretrained_hf_models/codellama_13b_instruct_hf")
+    parser.add_argument("--model_cache_dir", type=str, default="/scr/jphilipp/printllama-hgx/pretrained_hf_models/codellama_7b_instruct_hf")
+    parser.add_argument("--tokenizer_cache_dir", type=str, default="/scr/jphilipp/printllama-hgx/pretrained_hf_models/codellama_7b_instruct_hf")
     parser.add_argument("--max_new_tokens", type=int, default=2000)
     
     args = parser.parse_args()
