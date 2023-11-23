@@ -26,12 +26,12 @@ gpt4= GPT4Agent(
         model="gpt-4",
         max_tokens=500,
         temperature=0.7,
-        top_p=1.0,
+        top_p=0.9,
         n=1, 
     )
 
 
-batch_size = 50
+batch_size = 100
 
 
 system_message = """You are an expert researcher and programmer, especially skilled at debugging algorithms"""
@@ -47,33 +47,32 @@ The algorithm takes three inputs:
 
 The algorithm should return a tensor of shape (m, 1, p) which is the result of a matrix multiplication between a correctly sliced tensor from A and tensor B.
 
-Here is a current incorrect solution:
+Here is the current incorrect solution:
 ```python
 import torch
+
 def algorithm(A, B, slice_index):
     m, n, k = A.shape
     p = B.shape[1]
     A_sliced = A[slice_index, :, :]
     result = torch.mm(A_sliced, B)
-    return result.view(n, 1, p)
+    return result.view(m, 1, p)  
+```
 
 Input: 
 A = torch.randn(3, 4, 5)
 B = torch.randn(5, 6)
 slice_index = -1
-```
 
 You must return an improved solution. Be as creative as you can under the constraints.
 Your primary improvement must be novel and non-trivial. First, propose an idea, then implement it. 
-You algorithm has to run within max of 2 seconds and you are not allwed to use external libraries besides torch.
+You algorithm has to run within max of 2 seconds and you are not allowed to use external libraries besides torch.
 
-Format of the returned solution:
+Format your improved solution as follows:
 ```python
 def algorithm(A, B, slice_index):
     # Your code here
-```
-
-Just return code."""
+```"""
 
 responses = gpt4.batch_prompt(system_message, [human_message] * batch_size)
 code = extract_code(responses)
@@ -103,7 +102,7 @@ for c in code:
 
 system_message = """You are an expert researcher and programmer, especially skilled at debugging algorithms"""
 
-human_message_prints = """Repair the algorithm below. 
+human_message = """Repair the algorithm below. 
 
 The algorithm takes three inputs:
 
@@ -114,37 +113,11 @@ The algorithm takes three inputs:
 
 The algorithm should return a tensor of shape (m, 1, p) which is the result of a matrix multiplication between a correctly sliced tensor from A and tensor B.
 
-Here is a current incorrect solution:
+Here is the current incorrect solution:
 ```python
 import torch
+
 def algorithm(A, B, slice_index):
-    m, n, k = A.shape
-    p = B.shape[1]
-    A_sliced = A[slice_index, :, :]
-    result = torch.mm(A_sliced, B)
-    return result.view(n, 1, p)
-
-Input: 
-A = torch.randn(3, 4, 5)
-B = torch.randn(5, 6)
-slice_index = -1
-```
-
-You must return an improved solution. Be as creative as you can under the constraints.
-Your primary improvement must be novel and non-trivial. First, propose an idea, then implement it. 
-You algorithm has to run within max of 2 seconds and you are not allwed to use external libraries besides torch.
-
-Format of the returned solution:
-```python
-def algorithm(A, B, slice_index):
-    # Your code here
-```
-
-Hint: I have previously tried to debug the solution and inserted the following print statments: 
-
-``python
-import torch
-def algorithm_with_prints(A, B, slice_index):
     m, n, k = A.shape
     print(f"Dimensions of m, n, k: {m, n, k}")
     p = B.shape[1]
@@ -152,22 +125,30 @@ def algorithm_with_prints(A, B, slice_index):
     print(f"Shape of A_sliced: A_sliced.shape")
     result = torch.mm(A_sliced, B)
     print(f"Current result shape: {result.shape}")
-    print(f"Current Output shape: {result.view(n, 1, p).shape}")
-    return result.view(n, 1, p)
+    return result.view(m, 1, p)  
 ```
 
-Which resulted in the following output:
+Input: 
+A = torch.randn(3, 4, 5)
+B = torch.randn(5, 6)
+slice_index = -1
 
-```python
+Print Output:
 Dimensions of m, n, k: (3, 4, 5)
 Shape of A_sliced: torch.Size([4, 5])
 Current result shape: torch.Size([4, 6])
-Current Output shape: (3, 1, 6)
-```
 
-Just return code."""
+You must return an improved solution. Be as creative as you can under the constraints.
+Your primary improvement must be novel and non-trivial. First, propose an idea, then implement it. 
+You algorithm has to run within max of 2 seconds and you are not allowed to use external libraries besides torch.
 
-responses_print = gpt4.batch_prompt(system_message, [human_message_prints] * batch_size)
+Format your improved solution as follows:
+```python
+def algorithm(A, B, slice_index):
+    # Your code here
+```"""
+
+responses_print = gpt4.batch_prompt(system_message, [human_message] * batch_size)
 code_prints = extract_code(responses_print)
 
 evals_print = []
