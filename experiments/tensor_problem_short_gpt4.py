@@ -31,12 +31,12 @@ gpt4= GPT4Agent(
     )
 
 
-batch_size = 100
+batch_size = 200
 
 
 system_message = """You are given a task and an incorrect solution to the task. Return an improved solution using the same function name and arguments."""
 
-human_message = """You are given a 3D tensor A of shape (3, 4, 5), a 2D tensor B of shape (5, 6), and an integer slice_index = -1. Slice A using slice_index at the correct dimension and multiply the A_sliced with B to return a new 1D tensor of shape (18).
+human_message = """You are given a 3D tensor A of shape (3, 4, 5), a 2D tensor B of shape (5, 6), and an integer slice_index = -1. Slice A using slice_index at the correct dimension and multiply A_sliced with B to return a new 1D tensor of shape (3 * 6).
 
 Incorrect Solution:
 ```python
@@ -48,8 +48,7 @@ def algorithm(A, B, slice_index):
     return result.view(-1)
 ```
 
-You must return an improved solution. Be as creative as you can under the constraints.
-Your primary improvement must be non-trivial. First, propose an idea, then implement it."""
+You must return an improved solution. First, propose an idea, then implement it."""
 
 responses = gpt4.batch_prompt(system_message, [human_message] * batch_size)
 code = extract_code(responses)
@@ -76,7 +75,7 @@ for c in code:
 
 system_message = """You are given a task, an incorrect solution to the task, and a debugging attempt including print statement returns. Return an improved solution using the same function name and arguments."""
 
-human_message = """You are given a 3D tensor A of shape (3, 4, 5), a 2D tensor B of shape (5, 6), and an integer slice_index = -1. Slice A using slice_index at the correct dimension and multiply the A_sliced with B to return a new 1D tensor of shape (18).
+human_message = """You are given a 3D tensor A of shape (3, 4, 5), a 2D tensor B of shape (5, 6), and an integer slice_index = -1. Slice A using slice_index at the correct dimension and multiply A_sliced with B to return a new 1D tensor of shape (3 * 6).
 
 Incorrect Solution:
 ```python
@@ -93,17 +92,16 @@ Debugging Attempt:
 import torch
 
 def algorithm(A, B, slice_index):
+    print(f"Slice_index: {slice_index}")
     A_sliced = A[slice_index, :, :]
-    print(f"A_sliced.shape: {A_sliced.shape}")
     result = torch.mm(A_sliced, B)
     return result.view(-1)
 ```
 
 Prints:
-A_sliced.shape: torch.Size([3, 4])
+Slice_index: -1
 
-You must return an improved solution. Be as creative as you can under the constraints.
-Your primary improvement must be non-trivial. First, propose an idea, then implement it."""
+You must return an improved solution. First, propose an idea, then implement it."""
 
 responses_print = gpt4.batch_prompt(system_message, [human_message] * batch_size)
 code_prints = extract_code(responses_print)
