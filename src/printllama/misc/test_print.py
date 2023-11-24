@@ -1,7 +1,7 @@
 # Copyright (c) Meta Platforms, Inc. and affiliates.
 # This software may be used and distributed according to the terms of the Llama 2 Community License Agreement.
 
-from typing import Optional
+from typing import Optional, List
 
 import fire
 
@@ -12,33 +12,30 @@ import torch
 import re
 
 
-def extract_code(algorithm_strs: List[str]) -> List[str]:
+def extract_code(algorithm_str: List[str]) -> List[str]:
     """Extract code from algorithm string."""
-    extracted_code = []
-    for algorithm_str in algorithm_strs:
-        try:
-            # Split the string by the code block delimiters
-            code_block = algorithm_str.split("```")[1]
-            
-            code_block = re.sub(r"^\s*python\s*\n?", "", code_block, flags=re.IGNORECASE)
-
-            extracted_code.append(code_block)
-        except Exception:
-            # Fallback code if extraction fails
-            extracted_code.append("def algorithm(*args): return 0")
+    extracted_code = ""
+    
+    try:
+        # Split the string by the code block delimiters
+        code_block = algorithm_str.split("```")[1]
+        code_block = re.sub(r"^\s*python\s*\n?", "", code_block, flags=re.IGNORECASE)
+        extracted_code = code_block
+    except Exception:
+        # Fallback code if extraction fails
+        extracted_code = "def algorithm(*args): return 0"
 
     return extracted_code
-
 
 def main(
     ckpt_dir: str,
     tokenizer_path: str,
     temperature: float = 0.7,
     top_p: float = 0.9,
-    max_seq_len: int = 512,
-    max_batch_size: int = 10,
+    max_seq_len: int = 1024,
+    max_batch_size: int = 50,
     max_gen_len: Optional[int] = None,
-    n_batch: int = 10,
+    n_batch: int = 50,
 ):
     generator = Llama.build(
         ckpt_dir=ckpt_dir,
@@ -71,9 +68,12 @@ import torch
 
 def algorithm(A, B, slice_index):
     m, n, k = A.shape
+    print(f"Dimensions of m, n, k: {m, n, k}")
     p = B.shape[1]
     A_sliced = A[slice_index, :, :]
+    print(f"Shape of A_sliced: A_sliced.shape")
     result = torch.mm(A_sliced, B)
+    print(f"Current result shape: {result.shape}")
     return result.view(m, 1, p)  
 ```
 
@@ -81,6 +81,11 @@ Input:
 A = torch.randn(3, 4, 5)
 B = torch.randn(5, 6)
 slice_index = -1
+
+Print Output:
+Dimensions of m, n, k: (3, 4, 5)
+Shape of A_sliced: torch.Size([4, 5])
+Current result shape: torch.Size([4, 6])
 
 You must return an improved solution. Be as creative as you can under the constraints.
 Your primary improvement must be novel and non-trivial. First, propose an idea, then implement it. 
@@ -112,6 +117,7 @@ def algorithm(A, B, slice_index):
 
    
     for instruction, result in zip(instructions, results):
+
         try:
             code = extract_code(result["generation"]["content"])
             exec(code, globals())
@@ -127,7 +133,7 @@ def algorithm(A, B, slice_index):
         print("\n==================================\n")
 
     print(f"Accuracy: {sum(evals) / len(evals)}")
-
+    breakpoint()
 
 if __name__ == "__main__":
     fire.Fire(main)
