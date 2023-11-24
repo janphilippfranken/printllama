@@ -68,14 +68,15 @@ Debugging Attempt:
 import torch
 
 def algorithm(A, B, slice_index):
-    print(f"Slice_index: {slice_index}")
+    print(f"A.shape: {A.shape}")
     A_sliced = A[slice_index, :, :]
     result = torch.mm(A_sliced, B)
     return result.view(-1)
 ```
 
 Prints:
-Slice_index: -1
+A.shape: torch.Size([3, 4, 5])
+
 
 You must return an improved solution. First, propose an idea, then implement it.""",
             }
