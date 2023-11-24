@@ -87,15 +87,15 @@ Dimensions of m, n, k: (3, 4, 5)
 Shape of A_sliced: torch.Size([4, 5])
 Current result shape: torch.Size([4, 6])
 
-You must return an improved solution. Be as creative as you can under the constraints.
-Your primary improvement must be novel and non-trivial. First, propose an idea, then implement it. 
-You algorithm has to run within max of 2 seconds and you are not allowed to use external libraries besides torch.
+You are not allowed to use external libraries besides torch.
 
 Format your improved solution as follows:
 ```python
 def algorithm(A, B, slice_index):
     # Your code here
-```""",
+```
+
+Important: Only return ONE solution and make sure that it strictly adheres to the format above. Do not return any other code. Only return the improved function called "algorithm".""",
             }
         ]
 ]
@@ -107,6 +107,7 @@ def algorithm(A, B, slice_index):
     )
 
     evals = []
+    evals_count = 0
 
     m, n, k = 3, 4, 5
     p = 6
@@ -119,10 +120,13 @@ def algorithm(A, B, slice_index):
     for instruction, result in zip(instructions, results):
 
         try:
+
             code = extract_code(result["generation"]["content"])
+            print(code)
             exec(code, globals())
             code_result =  algorithm(A, B, slice_index).shape
             evals.append(code_result == (m, 1, p))
+            evals_count += 1
         except:
             evals.append(False)
         for msg in instruction:
@@ -133,6 +137,7 @@ def algorithm(A, B, slice_index):
         print("\n==================================\n")
 
     print(f"Accuracy: {sum(evals) / len(evals)}")
+    print(f"Evaluated {evals_count} out of {len(instructions)} instructions")
     breakpoint()
 
 if __name__ == "__main__":
