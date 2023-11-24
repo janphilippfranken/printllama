@@ -25,7 +25,7 @@ gpt4= GPT4Agent(
         model_id=1,
         model="gpt-4",
         max_tokens=500,
-        temperature=0.7,
+        temperature=0,
         top_p=0.9,
         n=1, 
     )
@@ -36,7 +36,7 @@ batch_size = 200
 
 system_message = """You are given a task and an incorrect solution to the task. Return an improved solution using the same function name and arguments."""
 
-human_message = """You are given a 3D tensor A of shape (3, 4, 5), a 2D tensor B of shape (5, 6), and an integer slice_index = -1. Slice A using slice_index at the correct dimension and multiply A_sliced with B to return a new 1D tensor of shape (3 * 6).
+human_message = """You are given a 3D tensor A of shape (m, n, k), a 2D tensor B of shape (k, p), and an integer slice_index = -1. Slice A using slice_index at the correct dimension and multiply A_sliced with B to return a new 1D tensor of shape (m * p).
 
 Incorrect Solution:
 ```python

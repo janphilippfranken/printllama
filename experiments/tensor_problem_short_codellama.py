@@ -30,7 +30,7 @@ def extract_code(algorithm_str: List[str]) -> List[str]:
 def main(
     ckpt_dir: str,
     tokenizer_path: str,
-    temperature: float = 0.7,
+    temperature: float = 0.0,
     top_p: float = 0.9,
     max_seq_len: int = 500,
     max_batch_size: int = 100,
@@ -51,16 +51,18 @@ def main(
             },
             {
                 "role": "user",
-                "content": """You are given a 3D tensor A of shape (3, 4, 5), a 2D tensor B of shape (5, 6), and an integer slice_index = -1. Slice A using slice_index at the correct dimension and multiply A_sliced with B to return a new 1D tensor of shape (3 * 6).
+                "content": """You are given a 3D tensor A of shape (m, n, k), a 2D tensor B of shape (k, p), and an integer slice_index = -1. Slice A using slice_index at the correct dimension and multiply A_sliced with B to return a new tensor of shape (m, 1, p).
 
 Incorrect Solution:
 ```python
 import torch 
 
 def algorithm(A, B, slice_index):
+    m, n, k = A.shape
+    p = B.shape[1]
     A_sliced = A[slice_index, :, :]
     result = torch.mm(A_sliced, B)
-    return result.view(-1)
+    return result.view(m, 1, p) 
 ```
 
 You must return an improved solution. First, propose an idea, then implement it.""",
@@ -104,6 +106,7 @@ You must return an improved solution. First, propose an idea, then implement it.
 
     print(f"Accuracy: {sum(evals) / len(evals)}")
     print(f"Evaluated {evals_count} out of {len(instructions)} instructions")
+    breakpoint()
     # write responses to text file 
     with open("responses.txt", "w") as f:
         for response in responses:

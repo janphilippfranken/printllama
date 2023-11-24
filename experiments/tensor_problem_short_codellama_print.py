@@ -30,7 +30,7 @@ def extract_code(algorithm_str: List[str]) -> List[str]:
 def main(
     ckpt_dir: str,
     tokenizer_path: str,
-    temperature: float = 0.7,
+    temperature: float = 0.1,
     top_p: float = 0.9,
     max_seq_len: int = 500,
     max_batch_size: int = 100,
@@ -71,12 +71,11 @@ def algorithm(A, B, slice_index):
     print(f"A.shape: {A.shape}")
     A_sliced = A[slice_index, :, :]
     result = torch.mm(A_sliced, B)
-    return result.view(-1)
+return result.view(-1)
 ```
 
 Prints:
 A.shape: torch.Size([3, 4, 5])
-
 
 You must return an improved solution. First, propose an idea, then implement it.""",
             }
