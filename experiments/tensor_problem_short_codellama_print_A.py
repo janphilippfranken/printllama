@@ -60,12 +60,13 @@ Incorrect Solution:
 import torch
 
 def algorithm(A, B, slice_index):
+    print(f"A.shape: {A.shape}") # Prints: A.shape: torch.Size([3, 4, 5])
     A_sliced = A[slice_index, :, :]
     result = torch.mm(A_sliced, B)
     return result.view(-1)
 ```
 
-Correct the solution to satisfy the task constraints. Do not change the name of the function or the number of arguments.""",
+Correct the solution to satisfy the task constraints. Do not change the name of the function or the number of arguments. Use the provided print statements for guidance while making corrections.""",
         },
     ],
 ]

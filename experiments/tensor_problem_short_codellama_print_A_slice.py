@@ -30,7 +30,7 @@ def extract_code(algorithm_str: List[str]) -> List[str]:
 def main(
     ckpt_dir: str,
     tokenizer_path: str,
-    temperature: float = 0.1,
+    temperature: float = 0.5,
     top_p: float = 0.9,
     max_seq_len: int = 500,
     max_batch_size: int = 100,
@@ -44,14 +44,16 @@ def main(
         max_batch_size=max_batch_size,
     )
 
-    instructions = n_batch * [[
+    instructions = n_batch * [
+        [
             {
                 "role": "system",
-                "content": """You are given a task and an incorrect solution to the task. Return an improved solution using the same function name and arguments.""",
+                "content": """You are given a task and an incorrect solution to the task.""",
             },
             {
                 "role": "user",
-                "content": """You are given a 3D tensor A of shape (3, 4, 5), a 2D tensor B of shape (5, 6), and an integer slice_index = -1. Slice A using slice_index at the correct dimension and multiply A_sliced with B to return a new 1D tensor of shape (3 * 6).
+                "content": """Task:
+You are given a 3D tensor A of shape (3, 4, 5), a 2D tensor B of shape (5, 6), and an integer slice_index = -1. You must return a 1D tensor of shape (3 * 6).
 
 Incorrect Solution:
 ```python
@@ -59,28 +61,16 @@ import torch
 
 def algorithm(A, B, slice_index):
     A_sliced = A[slice_index, :, :]
+    print(f"A_sliced.shape: {A_sliced.shape}") # Prints: A_sliced.shape: torch.Size([4, 5])
     result = torch.mm(A_sliced, B)
     return result.view(-1)
 ```
 
-Debugging Attempt:
-```python
-import torch
-
-def algorithm(A, B, slice_index):
-    print(f"A.shape: {A.shape}")
-    A_sliced = A[slice_index, :, :]
-    result = torch.mm(A_sliced, B)
-return result.view(-1)
-```
-
-Prints:
-A.shape: torch.Size([3, 4, 5])
-
-You must return an improved solution. First, propose an idea, then implement it.""",
-            }
-        ]
+Correct the solution to satisfy the task constraints. Do not change the name of the function or the number of arguments. Use the provided print statements for guidance while making corrections.""",
+        },
+    ],
 ]
+
     results = generator.chat_completion(
         instructions,  # type: ignore
         max_gen_len=max_gen_len,
@@ -118,6 +108,7 @@ You must return an improved solution. First, propose an idea, then implement it.
 
     print(f"Accuracy: {sum(evals) / len(evals)}")
     print(f"Evaluated {evals_count} out of {len(instructions)} instructions")
+    breakpoint()
     # write responses to text file 
     with open("responses.txt", "w") as f:
         for response in responses:
