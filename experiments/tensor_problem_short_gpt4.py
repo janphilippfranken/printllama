@@ -51,8 +51,8 @@ def algorithm(A, B, slice_index):
 
 Correct the solution to satisfy the task constraints. Do not change the name of the function or the number of arguments."""
 
-# responses = gpt4.batch_prompt(system_message, [human_message] * batch_size)
-# code = extract_code(responses)
+responses = gpt4.batch_prompt(system_message, [human_message] * batch_size)
+code = extract_code(responses)
 code = []
 evals = []
 
@@ -118,7 +118,7 @@ for c in code_prints:
         evals_print.append(False)
 
 
-# print(f"Mean evals without prints: {sum(evals) / len(evals)}", f"Number of evaluated solutions: {counts_evaluated}")
+print(f"Mean evals without prints: {sum(evals) / len(evals)}", f"Number of evaluated solutions: {counts_evaluated}")
 print(f"Mean evals with prints: {sum(evals_print) / len(evals_print)}", f"Number of evaluated solutions: {counts_evaluated_print}")
 
 breakpoint()
