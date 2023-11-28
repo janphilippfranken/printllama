@@ -31,7 +31,7 @@ gpt4= GPT4Agent(
     )
 
 
-batch_size = 100
+batch_size = 20
 
 
 system_message = """You are given a task and an incorrect solution to the task."""
@@ -117,7 +117,7 @@ for c in code_prints:
     except:
         evals_print.append(False)
 
-
+breakpoint()
 print(f"Mean evals without prints: {sum(evals) / len(evals)}", f"Number of evaluated solutions: {counts_evaluated}")
 print(f"Mean evals with prints: {sum(evals_print) / len(evals_print)}", f"Number of evaluated solutions: {counts_evaluated_print}")
 
