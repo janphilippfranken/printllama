@@ -1,0 +1,44 @@
+hydra:
+  run:
+    dir: outputs
+
+data:
+  dataset:
+    cache_dir: /scr/jphilipp/scai/datasets/hh-rlhf
+    n_shuffles: 1
+
+prompts:
+  train_prompt: train_prompt_1
+  conversation_batch_size: 3
+  test_prompt: test_prompt_1
+
+generation:
+  n_revisions: 100 # batch this, too
+  constitution_batch_size: 5
+  n_evals_per_revision: 10
+  verbose: true
+  original_dataset: true
+  init_constitution: 1. You are a helpful AI assistant.
+
+model:
+  hf_config:
+    model_id: mistral
+    pretrained_model_name_or_path: mistralai/Mistral-7B-Instruct-v0.1
+    load_in_8bit: true
+    device_map: auto
+    torch_dtype: float16
+    model_cache_dir: /scr/jphilipp/scai/pretrained_models/Mistral-7B-Instruct-v0.1
+    tokenizer_cache_dir: /scr/jphilipp/scai/pretrained_models/Mistral-7B-Instruct-v0.1
+
+  train_config:
+    max_new_tokens: 750
+    do_sample: true
+    top_p: 0.95
+    temperature: 0.5
+
+  test_config:
+    max_new_tokens: 1
+    do_sample: false
+    top_p: 1
+    temperature: 0
+    log_probs: true
