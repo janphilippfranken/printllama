@@ -10,13 +10,15 @@ import torch
 
 from printllama.helpers import extract_code
 
+
 # import models
 from printllama.models.codellama_meta.generation import Llama
+from printllama.models.huggingface.hf_inference_model import HFInferenceModel
 
 # logging
 logging.basicConfig(level=logging.INFO)
 
-
+#### UNDO THIS WHEN DONE TESTING
 @hydra.main(version_base=None, config_path="config", config_name="codellama-instruct-meta")
 def main(args: DictConfig) -> None:
     logging.info("Running inference model...")
@@ -34,12 +36,16 @@ def main(args: DictConfig) -> None:
     if not args.run.verbose:
         if is_meta:
             model = Llama.build(**args.model_config)
-            batch_prompt = [data] * args.run.batch_size
+            batched_prompts = [data] * args.run.batch_size
             completions = model.chat_completion(
-                batch_prompt,
+                batched_prompts,
                 **args.run.completion_config,
             )
-        else: 
+        elif is_hf: 
+            model = HFInferenceModel(**args.model_config)
+            batched_prompts = [data] * args.run.batch_size
+            completions = model.batch_prompt(batched_prompts, **args.run.completion_config)
+        else:
             print(f"Model type {args.model_type} not yet supported.")
 
     # COMPUTE METRICS FOR EXAMPLE UNIT TEST (currently hardcoded)
