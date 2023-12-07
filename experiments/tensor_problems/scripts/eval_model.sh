@@ -12,11 +12,11 @@
 
 # Load conda environment
 source /scr/jphilipp/miniconda3/etc/profile.d/conda.sh
-conda activate scai-tuning
+conda printllama
 
 
 # Change to the directory with your Python script
-cd ~/research_projects/scai-tuning/experiments/cai
+cd ~/research_projects/...
 
 # Run
-python generate_constitution.py
+python ...

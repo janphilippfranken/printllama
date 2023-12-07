@@ -8,21 +8,17 @@ import threading
 from tqdm import tqdm
 
 
-def extract_code(algorithm_strs: List[str]) -> List[str]:
+def extract_code(
+    algorithm_str: List[str],
+) -> List[str]:
     """Extract code from algorithm string."""
-    extracted_code = []
-    for algorithm_str in algorithm_strs:
-        try:
-            # Split the string by the code block delimiters
-            code_block = algorithm_str.split("```")[1]
-            
-            code_block = re.sub(r"^\s*python\s*\n?", "", code_block, flags=re.IGNORECASE)
-
-            extracted_code.append(code_block)
-        except Exception:
-            # Fallback code if extraction fails
-            extracted_code.append("def algorithm(*args): return 0")
-
+    extracted_code = ""
+    try:
+        code_block = algorithm_str.split("```")[1]
+        code_block = re.sub(r"^\s*python\s*\n?", "", code_block, flags=re.IGNORECASE)
+        extracted_code = code_block
+    except Exception:
+        extracted_code = "def algorithm(*args): return 0"
     return extracted_code
 
 
