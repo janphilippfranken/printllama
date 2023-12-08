@@ -108,7 +108,7 @@ class HFInferenceModel():
                 top_p=top_p,
                 temperature=temperature,
             )
-            output = self.tokenizer.batch_decode(output, skip_special_tokens=True)
+            output = self.tokenizer.batch_decode(output[:, inputs["input_ids"].shape[1]:], skip_special_tokens=True)
             return output
         else: 
             if log_probs_answer:

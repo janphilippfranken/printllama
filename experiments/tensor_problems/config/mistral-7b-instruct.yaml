@@ -1,0 +1,25 @@
+hydra:
+  run:
+    dir: outputs
+
+model_type: hf
+
+model_config:
+  pretrained_model_name_or_path: mistralai/Mistral-7B-Instruct-v0.1
+  model_id:  # unique identifier for accessing conversation buffer
+  load_in_8bit: true
+  device_map: auto
+  torch_dtype: float16
+  model_cache_dir: /scr/jphilipp/scai/pretrained_models/Mistral-7B-Instruct-v0.1
+  tokenizer_cache_dir: /scr/jphilipp/scai/pretrained_models/Mistral-7B-Instruct-v0.1
+
+
+data:
+  data_path: data/control_2.json
+
+run:
+  batch_size: 100
+  verbose: false
+  completion_config:
+    do_sample: false
+    max_new_tokens: 1000
