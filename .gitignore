@@ -11,12 +11,6 @@ __pycache__/
 */.DS_Store
 **/.DS_Store
 
-# ignore data directory
-data/
-**/data/
-*/data/
-
-
 # Distribution / packaging
 .Python
 build/

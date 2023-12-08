@@ -5,20 +5,18 @@ hydra:
 model_type: meta
 
 model_config:
-  ckpt_dir: /scr/jphilipp/printllama-hgx/codellama/CodeLlama-7b-Instruct/
-  tokenizer_path: /scr/jphilipp/printllama-hgx/codellama/CodeLlama-7b-Instruct/tokenizer.model
-  # ckpt_dir: /scr/jphilipp/research_projects/printllama/codellama/CodeLlama-13b-Instruct/
-  # tokenizer_path: /scr/jphilipp/research_projects/printllama/codellama/CodeLlama-13b-Instruct/tokenizer.model
+  ckpt_dir: /scr/jphilipp/printllama-hgx/codellama/CodeLlama-34b-Instruct/
+  tokenizer_path: /scr/jphilipp/printllama-hgx/codellama/CodeLlama-34b-Instruct/tokenizer.model
   max_seq_len: 500
   max_batch_size: 200
 
 data:
-  data_path: data/control_2.json
+  data_path: data/control.json
 
 run:
   batch_size: 100
   verbose: false
   completion_config:
     max_gen_len: 1000
-    temperature: 0
+    temperature: 0.1
     top_p: 0.9
