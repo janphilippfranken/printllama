@@ -5,7 +5,7 @@ model_config:
   max_seq_len: 500
   max_batch_size: 200
 data:
-  data_path: data/control.json
+  data_path: data/before_error.json
 run:
   batch_size: 100
   verbose: false

@@ -5,13 +5,13 @@ hydra:
 model_type: meta
 
 model_config:
-  ckpt_dir: /scr/jphilipp/printllama-hgx/codellama/CodeLlama-34b-Instruct/
-  tokenizer_path: /scr/jphilipp/printllama-hgx/codellama/CodeLlama-34b-Instruct/tokenizer.model
+  ckpt_dir: /scr/jphilipp/printllama-hgx/codellama/CodeLlama-7b-Instruct/
+  tokenizer_path: /scr/jphilipp/printllama-hgx/codellama/CodeLlama-7b-Instruct/tokenizer.model
   max_seq_len: 500
   max_batch_size: 200
 
 data:
-  data_path: data/control.json
+  data_path: data/before_error.json
 
 run:
   batch_size: 100
