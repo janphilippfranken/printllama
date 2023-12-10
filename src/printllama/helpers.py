@@ -16,6 +16,7 @@ def extract_code(
     try:
         code_block = algorithm_str.split("```")[1]
         code_block = re.sub(r"^\s*python\s*\n?", "", code_block, flags=re.IGNORECASE)
+        code_block = re.sub('\n', '\\n', code_block)  # exec() function requires function strings to be true newlines, not just escape character
         extracted_code = code_block
     except Exception:
         extracted_code = "def algorithm(*args): return 0"
