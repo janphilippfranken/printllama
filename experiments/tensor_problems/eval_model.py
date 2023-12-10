@@ -18,8 +18,7 @@ from printllama.models.huggingface.hf_inference_model import HFInferenceModel
 # logging
 logging.basicConfig(level=logging.INFO)
 
-#### UNDO THIS WHEN DONE TESTING
-@hydra.main(version_base=None, config_path="config", config_name="codellama-instruct-meta")
+@hydra.main(version_base=None, config_path="config", config_name="codellama-7b-hf")
 def main(args: DictConfig) -> None:
     logging.info("Running inference model...")
 
@@ -43,7 +42,7 @@ def main(args: DictConfig) -> None:
             )
         elif is_hf: 
             model = HFInferenceModel(**args.model_config)
-            batched_prompts = [data] * args.run.batch_size
+            batched_prompts = [f"{data[0]['content']}\n\n{data[1]['content']}"] * args.run.batch_size
             completions = model.batch_prompt(batched_prompts, **args.run.completion_config)
         else:
             print(f"Model type {args.model_type} not yet supported.")
@@ -76,7 +75,7 @@ def main(args: DictConfig) -> None:
 
     # write completions to file
     breakpoint()
-    with open('completions.json', "w") as f:
+    with open(f'{args.model_type.lower()}_{args.data.data_path}_completions.json', "w") as f:
         json.dump(completions, f)
 
 if __name__ == '__main__':
