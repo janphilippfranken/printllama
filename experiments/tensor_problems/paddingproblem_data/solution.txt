@@ -1,0 +1,6 @@
+def algorithm_correct(tensors, id):
+    max_length = max([t.size(0) for t in tensors])
+    padding_lengths = [max_length - t.size(0) for t in tensors]
+    pads = [torch.full((pad_len, ), id) for pad_len in padding_lengths]
+    padded_tensors = [torch.cat((t, pad)) for t, pad in zip(tensors, pads)]
+    return torch.stack(padded_tensors)

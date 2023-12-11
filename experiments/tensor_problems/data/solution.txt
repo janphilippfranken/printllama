@@ -1,0 +1,4 @@
+def algorithm(A, B, slice_index):
+   A_sliced = A[:, slice_index, :] 
+   result = torch.mm(A_sliced, B)
+   return result.view(-1)

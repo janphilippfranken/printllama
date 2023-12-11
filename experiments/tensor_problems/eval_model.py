@@ -7,6 +7,8 @@ import numpy as np
 import json
 import logging
 import torch
+import random
+import re
 
 from printllama.helpers import extract_code
 
@@ -46,29 +48,53 @@ def main(args: DictConfig) -> None:
             completions = model.batch_prompt(batched_prompts, **args.run.completion_config)
         else:
             print(f"Model type {args.model_type} not yet supported.")
-
     # COMPUTE METRICS FOR EXAMPLE UNIT TEST (currently hardcoded)
     responses = [] 
     results = []
     evals_count = 0
 
-    # unit test params
-    m, n, k = 3, 4, 5
-    p = 6
-    A = torch.randn(m, n, k)
-    B = torch.randn(k, p)
-    slice_index = -1
+
+    if 'paddingproblem' in args.data.data_path:
+        NUM_TENSORS = 16
+        MIN_TENSOR_SIZE = 16
+        MAX_TENSOR_SIZE = 256
+        MAX_ELEMENT_VAL = 32000
+        id = 32001
+        tensors = [torch.randint(high=MAX_ELEMENT_VAL, size=(random.randint(MIN_TENSOR_SIZE, MAX_TENSOR_SIZE + 1),)) for _ in range(NUM_TENSORS)]
+    else:
+        m, n, k = 3, 4, 5
+        p = 6
+        A = torch.randn(m, n, k)
+        B = torch.randn(k, p)
+        slice_index = -1
+    
+
+    # load solution
+    with open(args.data.solution, 'r') as f:
+        solution = f.read()
+        solution = re.sub('\n', '\\n', solution)
+        exec(solution, globals())  ## set algorithm_correct() to the solution function
+
 
     for completion in completions:
         try:
-            responses.append(completion["generation"]["content"])
-            code = extract_code(completion["generation"]["content"])
+            print(f"Globals within block: {globals()}")
+            if is_meta:
+                responses.append(completion["generation"]["content"])
+                code = extract_code(completion["generation"]["content"])
+            elif is_hf:
+                responses.append(completion)
+                code = extract_code(completion)
             exec(code, globals())
-            shape = algorithm(A, B, slice_index).shape
-            results.append(shape == torch.Size([m * p]))
+            if 'paddingproblem' in args.data.data_path:
+                results.append(torch.equal(algorithm_correct(tensors, id), algorithm(tensors, id)))
+            else:
+                shape = algorithm(A, B, slice_index).shape
+                results.append(shape == torch.Size([m * p]))
             evals_count += 1
         except:
             results.append(False)
+
     
     print(f"Accuracy: {sum(results) / len(results)}")
     print(f"Evaluated {evals_count} out of {args.run.batch_size} unit tests")

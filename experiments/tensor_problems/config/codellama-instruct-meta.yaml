@@ -12,6 +12,7 @@ model_config:
 
 data:
   data_path: data/before_error.json
+  solution: data/solution.txt
 
 run:
   batch_size: 100
