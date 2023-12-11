@@ -48,12 +48,15 @@ def main(args: DictConfig) -> None:
             completions = model.batch_prompt(batched_prompts, **args.run.completion_config)
         else:
             print(f"Model type {args.model_type} not yet supported.")
+
+
     # COMPUTE METRICS FOR EXAMPLE UNIT TEST (currently hardcoded)
     responses = [] 
     results = []
     evals_count = 0
+    
 
-
+    # TODO: streamline the unit testing structure
     if 'paddingproblem' in args.data.data_path:
         NUM_TENSORS = 16
         MIN_TENSOR_SIZE = 16
@@ -75,10 +78,15 @@ def main(args: DictConfig) -> None:
         solution = re.sub('\n', '\\n', solution)
         exec(solution, globals())  ## set algorithm_correct() to the solution function
 
-
+    """
+    is_meta = False
+    is_hf = True
+    with open ('completions.json', 'r') as f:
+        completions = json.load(f)
+    breakpoint()
+    """
     for completion in completions:
         try:
-            print(f"Globals within block: {globals()}")
             if is_meta:
                 responses.append(completion["generation"]["content"])
                 code = extract_code(completion["generation"]["content"])
@@ -87,7 +95,8 @@ def main(args: DictConfig) -> None:
                 code = extract_code(completion)
             exec(code, globals())
             if 'paddingproblem' in args.data.data_path:
-                results.append(torch.equal(algorithm_correct(tensors, id), algorithm(tensors, id)))
+                correct = torch.equal(algorithm_correct(tensors, id), algorithm(tensors, id))
+                results.append(correct)
             else:
                 shape = algorithm(A, B, slice_index).shape
                 results.append(shape == torch.Size([m * p]))
@@ -96,12 +105,15 @@ def main(args: DictConfig) -> None:
             results.append(False)
 
     
-    print(f"Accuracy: {sum(results) / len(results)}")
+    print(f"Overall accuracy: {sum(results) / len(results)}")
     print(f"Evaluated {evals_count} out of {args.run.batch_size} unit tests")
+    if evals_count: print(f"Accuracy among evaluatable outputs: {sum(results) / evals_count}")
 
     # write completions to file
-    breakpoint()
-    with open(f'{args.model_type.lower()}_{args.data.data_path}_completions.json', "w") as f:
+    model_name = args.model_config.pretrained_model_name_or_path.lower().replace('/', '')
+    data_name = args.data.data_path.lower().replace('/', '')
+    output_path = model_name + '_' + data_name
+    with open(f'{output_path}_completions.json', "w") as f:
         json.dump(completions, f)
 
 if __name__ == '__main__':

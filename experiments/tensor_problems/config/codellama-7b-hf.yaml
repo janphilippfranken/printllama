@@ -14,11 +14,11 @@ model_config:
   tokenizer_cache_dir: /scr/andukuri/
 
 data:
-  data_path: paddingproblem_data/after_error.json
+  data_path: paddingproblem_data/control.json
   solution: paddingproblem_data/solution.txt
 
 run:
-  batch_size: 10
+  batch_size: 100
   verbose: false
   completion_config:
     do_sample: true
