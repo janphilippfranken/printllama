@@ -1,0 +1,4 @@
+name: 1_P_H_HD_NID
+problem_name: attentionproblem_shapesincluded
+data_path: data/attentionproblem_shapesincluded/1_P_H_HD_NID.json
+solution_path: data/attentionproblem_shapesincluded/solution.txt

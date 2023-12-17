@@ -87,6 +87,7 @@ class Llama:
 
         # seed must be the same in all processes
         torch.manual_seed(1)
+        #torch.manual_seed(100)
 
         if local_rank > 0:
             sys.stdout = open(os.devnull, "w")

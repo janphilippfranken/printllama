@@ -1,0 +1,18 @@
+class Solution:
+    def algorithm(
+        Q: torch.Tensor,
+        K: torch.Tensor,
+        V: torch.Tensor
+    ) -> torch.Tensor:
+        '''
+        args:
+            Q (batch_size, input_len, d_K)
+            K (batch_size, output_len, d_K)
+            V (batch_size, output_len, d_V)
+
+        return:
+            output (batch_size, input_len, d_V)
+        '''
+        scores = torch.matmul(Q, K.transpose(-2, -1))
+        output = torch.matmul(scores, V)
+        return output

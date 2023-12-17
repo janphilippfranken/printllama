@@ -118,7 +118,7 @@ hydra:
     override_dirname: ''
     id: ???
     num: ???
-    config_name: codellama-instruct-meta
+    config_name: codellama-7b-instruct-meta
     env_set: {}
     env_copy: []
     config:

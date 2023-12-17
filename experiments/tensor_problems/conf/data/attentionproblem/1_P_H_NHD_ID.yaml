@@ -1,0 +1,4 @@
+name: 1_P_H_NHD_ID
+problem_name: attentionproblem
+data_path: data/attentionproblem/1_P_H_NHD_ID.json
+solution_path: data/attentionproblem/solution.txt

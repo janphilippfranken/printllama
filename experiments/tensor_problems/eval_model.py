@@ -1,5 +1,6 @@
 import hydra
 from omegaconf import DictConfig
+import argparse
 import fire
 import pandas as pd
 from tqdm import tqdm
@@ -9,6 +10,8 @@ import logging
 import torch
 import random
 import re
+import time
+import os
 
 from printllama.helpers import extract_code
 
@@ -20,34 +23,45 @@ from printllama.models.huggingface.hf_inference_model import HFInferenceModel
 # logging
 logging.basicConfig(level=logging.INFO)
 
-@hydra.main(version_base=None, config_path="config", config_name="codellama-7b-hf")
+
+@hydra.main(version_base=None, config_path="conf", config_name='config')
 def main(args: DictConfig) -> None:
     logging.info("Running inference model...")
 
+
     # GET INFERENCE MODEL TYPE (HF, OPENAI, ETC.)
-    is_meta = "meta" in args.model_type.lower()
-    is_hf = "hf" in args.model_type.lower()
-    is_openai = "openai" in args.model_type.lower()
+    is_meta = "meta" in args.model.model_type.lower()
+    is_hf = "hf" in args.model.model_type.lower()
+    is_openai = "openai" in args.model.model_type.lower()
+
 
     # GET DATA
+    start = time.time()
     with open(args.data.data_path, "r") as f:
         data = json.load(f)
+    print(f"==== Data loaded in {time.time() - start} seconds ====")
+
 
     # BUILD MODEL AND RUN INFERENCE
-    if not args.run.verbose:
+    if not args.model.run.verbose:
         if is_meta:
-            model = Llama.build(**args.model_config)
-            batched_prompts = [data] * args.run.batch_size
+            start = time.time()
+            model = Llama.build(**args.model.model_config)
+            print(f"==== Model built in {time.time() - start} seconds ====")
+            batched_prompts = [data] * args.model.run.batch_size
+            print(f"Began batch prompting...")
+            start = time.time()
             completions = model.chat_completion(
                 batched_prompts,
-                **args.run.completion_config,
+                **args.model.run.completion_config,
             )
+            print(f"==== Completions generated in {time.time() - start} seconds ====")
         elif is_hf: 
-            model = HFInferenceModel(**args.model_config)
-            batched_prompts = [f"{data[0]['content']}\n\n{data[1]['content']}"] * args.run.batch_size
-            completions = model.batch_prompt(batched_prompts, **args.run.completion_config)
+            model = HFInferenceModel(**args.model.model_config)
+            batched_prompts = [f"{data[0]['content']}\n\n{data[1]['content']}"] * args.model.run.batch_size
+            completions = model.batch_prompt(batched_prompts, **args.model.run.completion_config)
         else:
-            print(f"Model type {args.model_type} not yet supported.")
+            print(f"Model type {args.model.model_type} not yet supported.")
 
 
     # COMPUTE METRICS FOR EXAMPLE UNIT TEST (currently hardcoded)
@@ -57,64 +71,92 @@ def main(args: DictConfig) -> None:
     
 
     # TODO: streamline the unit testing structure
-    if 'paddingproblem' in args.data.data_path:
-        NUM_TENSORS = 16
-        MIN_TENSOR_SIZE = 16
-        MAX_TENSOR_SIZE = 256
-        MAX_ELEMENT_VAL = 32000
-        id = 32001
-        tensors = [torch.randint(high=MAX_ELEMENT_VAL, size=(random.randint(MIN_TENSOR_SIZE, MAX_TENSOR_SIZE + 1),)) for _ in range(NUM_TENSORS)]
-    else:
-        m, n, k = 3, 4, 5
-        p = 6
-        A = torch.randn(m, n, k)
-        B = torch.randn(k, p)
-        slice_index = -1
+    if 'attentionproblem' in args.data.data_path:
+        # d_Q, d_K must be equal
+        d_Q, d_K, d_V = 32, 32, 48
+        batch_size = 64
+
+        # input_len == output_len -> can be treated as self attention
+        # input_len != output_len -> cross attention
+        input_len, output_len = 50, 50  
+
+        Q, K, V = torch.randn(batch_size, input_len, d_Q), torch.randn(batch_size, output_len, d_K), torch.randn(batch_size, output_len, d_V)
+        # in cross attention, K and V are for sequence B, Q is for sequence A
     
 
-    # load solution
-    with open(args.data.solution, 'r') as f:
+    # LOAD SOLUTION
+    start = time.time()
+    with open(args.data.solution_path, 'r') as f:
         solution = f.read()
-        solution = re.sub('\n', '\\n', solution)
-        exec(solution, globals())  ## set algorithm_correct() to the solution function
+        solution = re.sub('\n', '\\n', solution)  
+        exec(solution, globals())   ## set Solution.algorithm() to the solution function
+    print(f"==== Solution loaded in {time.time() - start} seconds ====")
 
-    """
-    is_meta = False
-    is_hf = True
-    with open ('completions.json', 'r') as f:
-        completions = json.load(f)
-    breakpoint()
-    """
+
+    # EVALUATE COMPLETIONS
+    start = time.time()
     for completion in completions:
         try:
             if is_meta:
                 responses.append(completion["generation"]["content"])
                 code = extract_code(completion["generation"]["content"])
-            elif is_hf:
-                responses.append(completion)
-                code = extract_code(completion)
-            exec(code, globals())
-            if 'paddingproblem' in args.data.data_path:
-                correct = torch.equal(algorithm_correct(tensors, id), algorithm(tensors, id))
+            
+            
+            exec(code, globals())  ## set output of completion to the function to be tested
+            if 'attentionproblem' in args.data.data_path:
+                correct = Solution.algorithm(Q, K, V).shape == algorithm(Q, K, V).shape
                 results.append(correct)
-            else:
-                shape = algorithm(A, B, slice_index).shape
-                results.append(shape == torch.Size([m * p]))
             evals_count += 1
         except:
             results.append(False)
+        
+        # remove algorithm from memory to not contaminate results with incorrectly named outputs
+        globals().pop('algorithm', None)  
+    print(f"==== Evaluation completed in {time.time() - start} seconds ====")
 
-    
+
+    # PRINT METRICS
     print(f"Overall accuracy: {sum(results) / len(results)}")
-    print(f"Evaluated {evals_count} out of {args.run.batch_size} unit tests")
+    print(f"Evaluated {evals_count} out of {args.model.run.batch_size} unit tests")
     if evals_count: print(f"Accuracy among evaluatable outputs: {sum(results) / evals_count}")
 
-    # write completions to file
-    model_name = args.model_config.pretrained_model_name_or_path.lower().replace('/', '')
-    data_name = args.data.data_path.lower().replace('/', '')
+
+    
+    
+    model_name = args.model.name
+    data_name = args.data.name
     output_path = model_name + '_' + data_name
-    with open(f'{output_path}_completions.json', "w") as f:
+    
+    
+    if not os.path.exists(f'completions/{args.data.problem_name}/{args.model.name}/seed{seed}/'):
+        os.makedirs(f'completions/{args.data.problem_name}/{args.model.name}/seed{seed}/')
+    if not os.path.exists(f'metrics/{args.data.problem_name}/{args.model.name}/seed{seed}/'):
+        os.makedirs(f'metrics/{args.data.problem_name}/{args.model.name}/seed{seed}/')
+
+
+
+
+
+    # WRITE COMPLETIONS TO FILE
+    start = time.time()
+    with open(f'completions/{args.data.problem_name}/{args.model.name}/seed{seed}/{args.data.problem_name}_completions.json', "w") as f:
         json.dump(completions, f)
+    print(f"==== Completions written to file in {time.time() - start} seconds ====")
+
+
+    # WRITE METRICS TO FILE
+    metrics = {'ID' : output_path,
+            'Overall accuracy' : sum(results) / len(results),
+            'Evaluated # out of 100' : evals_count,
+            'Accuracy among evaluatable outputs' : sum(results) / evals_count if evals_count else None}
+    start = time.time()
+    with open(f'metrics/{args.data.problem_name}/{args.model.name}/seed{seed}/{args.data.problem_name}_metrics.json', "w") as f:
+        json.dump(metrics, f)
+    print(f"==== Metrics written to file in {time.time() - start} seconds ====")
+
 
 if __name__ == '__main__':
-    fire.Fire(main())
+    try:
+        fire.Fire(main())
+    except:
+        pass

@@ -1,0 +1,26 @@
+model:
+  hydra:
+    run:
+      dir: outputs
+  model_type: meta
+  name: codellama-13b-instruct-meta
+  model_config:
+    ckpt_dir: /scr/jphilipp/printllama-hgx/codellama/CodeLlama-13b-Instruct/
+    tokenizer_path: /scr/jphilipp/printllama-hgx/codellama/CodeLlama-13b-Instruct/tokenizer.model
+    max_seq_len: 1000
+    max_batch_size: 100
+    model_parallel_size: 2
+  data:
+    data_path: attentionproblem_data/control_blankhint.json
+    solution: attentionproblem_data/solution.txt
+  run:
+    batch_size: 100
+    verbose: false
+    completion_config:
+      max_gen_len: 2000
+      temperature: 0.1
+      top_p: 0.9
+data:
+  name: 2_P_NH_NHD_ID
+  data_path: data/attentionproblem_shapesincluded/2_P_NH_NHD_ID.json
+  solution_path: data/attentionproblem_shapesincluded/solution.txt

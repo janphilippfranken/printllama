@@ -1,0 +1,10 @@
+[
+    {
+        "role": "system",
+        "content": "You are given a task and an incorrect solution to the task."
+    },
+    {
+        "role": "user",
+        "content": "Task:\nYou are given three 3D PyTorch tensors Q (64, 50, 32), K (64, 50, 32) and V (64, 50, 48). Your task is to compute an output (64, 50, 48) using only computations performed on the three given tensors.\n\nInstructions:\nCorrect the solution to satisfy the task constraints. Do not change the name of the function or the number of arguments. Return the full corrected ```algorithm``` function.\n\nIncorrect Solution:\n```python\nimport torch\n\n\ndef algorithm(\n    Q: torch.Tensor, \n    K: torch.Tensor, \n    V: torch.Tensor\n) -> torch.Tensor:\n    '''\n    args:\n        Q: torch.Tensor of shape (64, 50, 32)\n        K: torch.Tensor of shape (64, 50, 32)\n        V: torch.Tensor of shape (64, 50, 48)\n\n    return:\n        output: torch.Tensor of shape (64, 50, 48)\n    '''\n    scores = torch.matmul(Q, K.transpose(-2, -1))\n    output = torch.matmul(V.transpose(-2, -1), scores.transpose(-2, -1))\n    return output\n```\n"
+    }
+]
