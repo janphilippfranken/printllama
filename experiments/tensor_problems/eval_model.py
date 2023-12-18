@@ -19,6 +19,8 @@ from printllama.helpers import extract_code
 # import models
 from printllama.models.codellama_meta.generation import Llama
 from printllama.models.huggingface.hf_inference_model import HFInferenceModel
+from printllama.models.openai.azure import AsyncAzureChatLLM
+from printllama.models.openai.gpt4 import GPT4Agent
 
 # logging
 logging.basicConfig(level=logging.INFO)
@@ -60,6 +62,14 @@ def main(args: DictConfig) -> None:
             model = HFInferenceModel(**args.model.model_config)
             batched_prompts = [f"{data[0]['content']}\n\n{data[1]['content']}"] * args.model.run.batch_size
             completions = model.batch_prompt(batched_prompts, **args.model.run.completion_config)
+        elif is_openai:
+            args.model.model_config.azure_api.api_key = os.getenv("OPENAI_API_KEY")
+            llm = AsyncAzureChatLLM(**args.model.model_config.azure_api)
+            model = GPT4Agent(llm=llm, **args.model.run.completion_config)
+            completions = model.batch_prompt(
+                system_message=data[0]['content'], 
+                messages=[data[1]['content']] * args.model.run.batch_size,
+            )
         else:
             print(f"Model type {args.model.model_type} not yet supported.")
 

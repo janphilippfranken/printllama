@@ -21,7 +21,7 @@ llm = AsyncAzureChatLLM(
 
 gpt4= GPT4Agent(
         llm=llm,
-        budget=1,
+        batch_size=1,
         model_id=1,
         model="gpt-4",
         max_tokens=500,

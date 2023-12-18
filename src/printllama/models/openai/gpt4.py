@@ -24,14 +24,10 @@ class GPT4Agent():
     def __init__(
         self, 
         llm: Any,
-        model_id: str, 
-        budget: int,
-        **model_args,
+        **completion_config,
     ) -> None:
         self.llm = llm
-        self.model_id = model_id
-        self.budget = budget
-        self.model_args = model_args
+        self.completion_config = completion_config
         self.all_responses = []
         self.total_inference_cost = 0
 
@@ -48,12 +44,11 @@ class GPT4Agent():
         Returns:
         float: The cost of the response.
         """
-        model_name = response.model
         input_tokens = response.usage.prompt_tokens
         output_tokens = response.usage.completion_tokens
         cost = (
-            MODEL_COST_PER_INPUT[model_name] * input_tokens
-            + MODEL_COST_PER_OUTPUT[model_name] * output_tokens
+            MODEL_COST_PER_INPUT['gpt-4'] * input_tokens
+            + MODEL_COST_PER_OUTPUT['gpt-4'] * output_tokens
         )
         return cost
 
@@ -74,36 +69,33 @@ class GPT4Agent():
     async def get_response(
         self, 
         messages: List[Dict[str, str]],
-        temperature: float = 0.7,
     ) -> Any:
         """
         Get the response from the model.
         """
-        self.model_args['temperature'] = temperature
-        return await self.llm(messages=messages, **self.model_args)
+        return await self.llm(messages=messages, **self.completion_config)
     
     async def run(
         self, 
-        expertise: str,
+        system_message: str,
         message: str,
-        temperature: float = 0.7,
     ) -> Dict[str, Any]:
         """Runs the Code Agent
 
         Args:
-            expertise (str): The system message to use
+            system_message (str): The system message to use
             message (str): The user message to use
 
         Returns:
             A dictionary containing the code model's response and the cost of the performed API call
         """
         # Get the prompt
-        messages = self.get_prompt(system_message=expertise, user_message=message)
+        messages = self.get_prompt(system_message=system_message, user_message=message)
         # Get the response
-        response = await self.get_response(messages=messages, temperature=temperature)
+        response = await self.get_response(messages=messages)
         # Get Cost
         cost = self.calc_cost(response=response)
-        print(f"Cost for running {self.model_args['model']}: {cost}")
+        print(f"Cost for running gpt4: {cost}")
         # Store response including cost 
         full_response = {
             'response': response,
@@ -118,33 +110,31 @@ class GPT4Agent():
     
     async def batch_prompt_sync(
         self, 
-        expertise: str, 
+        system_message: str, 
         messages: List[str],
-        temperature: float = 0.7,
     ) -> List[str]:
         """Handles async API calls for batch prompting.
 
         Args:
-            expertise (str): The system message to use
+            system_message (str): The system message to use
             messages (List[str]): A list of user messages
 
         Returns:
             A list of responses from the code model for each message
         """
-        responses = [self.run(expertise, message, temperature) for message in messages]
+        responses = [self.run(system_message, message) for message in messages]
         return await asyncio.gather(*responses)
 
     def batch_prompt(
         self, 
-        expertise: str, 
+        system_message: str, 
         messages: List[str], 
-        temperature: float = 0.7,
     ) -> List[str]:
         """=
         Synchronous wrapper for batch_prompt.
 
         Args:
-            expertise (str): The system message to use
+            system_message (str): The system message to use
             messages (List[str]): A list of user messages
             temperature (str): The temperature to use for the API call
 
@@ -154,4 +144,4 @@ class GPT4Agent():
         loop = asyncio.get_event_loop()
         if loop.is_running():
             raise RuntimeError(f"Loop is already running.")
-        return loop.run_until_complete(self.batch_prompt_sync(expertise, messages, temperature))
+        return loop.run_until_complete(self.batch_prompt_sync(system_message, messages))

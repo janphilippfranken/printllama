@@ -148,3 +148,4 @@ class HFInferenceModel():
                     results["log_probs_answer_a"].append(log_prob_answer_a)
                     results["log_probs_answer_b"].append(log_prob_answer_b)
                 return results
+            
