@@ -14,6 +14,10 @@ import pandas as pd
 import numpy as np
 from scipy import stats
 import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
+import matplotlib.font_manager as font_manager
+import numpy as np
+import seaborn as sns
 
 from matplotlib.patches import FancyBboxPatch
 
@@ -26,130 +30,109 @@ logging.basicConfig(level=logging.INFO)
 def main(args: DictConfig) -> None:
     logging.info("Plotting metrics...")
 
+    seed = 1
 
-    directory = f'metrics/{args.data.problem_name}/{args.model.name}/'
-
-    results = {}
+    models = ['codellama-7b-meta', 'codellama-7b-instruct-meta', 'codellama-13b-instruct-meta', 'huggingfaceh4-zephyr-7b-beta-hf']
     
-    # LOAD METRICS
-    for filename in os.listdir(directory):
-        if filename.startswith('SEED100') and filename.endswith('.json'):
-            try:
-                with open(f'{directory}{filename}', 'r') as f:
-                    metrics = json.load(f)
-                results[metrics['ID']] = metrics
-                print(f"Loaded {filename} metrics.")
-            except:
-                continue
-            
-            
-            
-            
-            
-    def get_fancy_bbox(bb, boxstyle, color, background=False, mutation_aspect=3):
-        """
-        Creates a fancy bounding box for the bar plots. Adapted from Eric's function.
-        """
-        if background:
-            height = bb.height - 2
-        else:
-            height = bb.height
-        if background:
-            base = bb.ymin # - 0.2
-        else:
-            base = bb.ymin
-        return FancyBboxPatch(
-            (bb.xmin, base),
-            abs(bb.width), height,
-            boxstyle=boxstyle,
-            ec="none", fc=color,
-            mutation_aspect=mutation_aspect, # change depending on ylim
-            zorder=2
-        )
+    def many_problems():
+        plt.rcParams.update({'font.size': 8})
+        plt.rcParams["font.family"] = "Avenir"
 
+        overall_control_accuracies = []
+        overall_print_accuracies = []
+        overall_control_evalcounts = []
+        overall_print_evalcounts = []
+        # LOAD ATTENTION PROBLEM METRICS
+        for model_name in models:
+            model_best_control_accuracies, model_best_print_accuracies = [], []
+            for problem_name in ['attentionproblem', 'trilproblem', 'maskingproblem', 'row-wisemeanproblem']:
+                directory = f'metrics/{problem_name}/{model_name}/seed{seed}/'
+                control_accuracies = []
+                print_accuracies = []
+                control_evalcounts = []
+                print_evalcounts = []
+                for filename in os.listdir(directory):
+                    with open(f'{directory}{filename}', 'r') as f:
+                        metrics = json.load(f)
+                    if 'print' in metrics['ID'] or '_P_' in metrics['ID']:
+                        print_accuracies.append(metrics['Overall accuracy'])
+                        print_evalcounts.append(metrics['Evaluated # out of 100'])
+                    else:
+                        control_accuracies.append(metrics['Overall accuracy'])
+                        control_evalcounts.append(metrics['Evaluated # out of 100'])
 
-    #sns.set_theme(style="darkgrid")
-    plt.rcParams['font.family'] = 'Avenir'
-    plt.rcParams['font.size'] = 30
+                    print(f"Loaded {problem_name} metrics for {model_name}.")
+                
+                best_control = max(control_accuracies)
+                best_print = max(print_accuracies)
+                
+                model_best_control_accuracies.append(best_control)
+                model_best_print_accuracies.append(best_print)
+                
+                
 
-    #colors = sns.palettes.color_palette("colorblind", 10)
-    #color = colors[0]
-    color='r'
-
-
-
+                # model_control_accuracies.append(sum(control_accuracies) / len(control_accuracies) if len(control_accuracies) else 0.0)
+                # model_print_accuracies.append(sum(print_accuracies) / len(print_accuracies) if len(print_accuracies) else 0.0)
+                # model_control_evalcounts.append(sum(control_evalcounts) / len(control_evalcounts) if len(control_evalcounts) else 0.0)
+                # model_print_evalcounts.append(sum(print_evalcounts) / len(print_evalcounts) if len(print_evalcounts) else 0.0)
+                
+            overall_control_accuracies.append(model_best_control_accuracies)
+            # overall_control_evalcounts.append(model_control_evalcounts)
+            overall_print_accuracies.append(model_best_print_accuracies)
+            # overall_print_evalcounts.append(model_print_evalcounts)
 
 
+        
+        #makeplot(means, sems, f'{args.model.name} Overall')
+        control_means = [np.mean(lst) for lst in overall_control_accuracies]
+        control_sems = [stats.sem(lst) for lst in overall_control_accuracies]
+        print_means = [np.mean(lst) for lst in overall_print_accuracies]
+        print_sems = [stats.sem(lst) for lst in overall_print_accuracies]
+        # Sample data
+        categories = models
 
-    
-    CONTROL = ['C_NP_H_NHD_NID', 'C_NP_NH_NHD_NID']
-    PRINT = ['1_P_H_HD_NID', '1_P_H_NHD_ID', '1_P_H_NHD_NID', '1_P_NH_NHD_ID', '1_P_NH_NHD_NID', '2_P_H_HD_NID', '2_P_H_NHD_ID', '2_P_H_NHD_NID', '2_P_NH_NHD_ID', '2_P_NH_NHD_NID']
-    PRINT_1 = ['1_P_H_HD_NID', '1_P_H_NHD_ID', '1_P_H_NHD_NID', '1_P_NH_NHD_ID', '1_P_NH_NHD_NID']
-    PRINT_2 = ['2_P_H_HD_NID', '2_P_H_NHD_ID', '2_P_H_NHD_NID', '2_P_NH_NHD_ID', '2_P_NH_NHD_NID']
-    
-    
-    
-    # COMPILE OVERALL ACCURACIES
-    CONTROL_overallaccuracies = [results[f'{args.model.name}_{key}']['Overall accuracy'] for key in CONTROL]
-    PRINT_overallaccuracies = [results[f'{args.model.name}_{key}']['Overall accuracy'] for key in PRINT]
-    PRINT_1_overallaccuracies = [results[f'{args.model.name}_{key}']['Overall accuracy'] for key in PRINT_1]
-    PRINT_2_overallaccuracies = [results[f'{args.model.name}_{key}']['Overall accuracy'] for key in PRINT_2]
-    
-    
-    
-    # CONTROL vs PRINT plots
-    means = [np.mean(lst) for lst in (CONTROL_overallaccuracies, PRINT_overallaccuracies)]
-    sems = [stats.sem(lst) for lst in (CONTROL_overallaccuracies, PRINT_overallaccuracies)]    
-    
-    
-    
-    # Plotting
-    fig, ax = plt.subplots(figsize=(10, 5))
-    plt.bar(x=[0, 1], height=means, yerr=sems, capsize=.2, color=color)
-    plt.title('Average Accuracy ± SEM for Each Group')
-    plt.ylabel('Average Accuracy')
-    plt.xlabel('Group Condition')
+    # Number of categories
+        n_categories = len(categories)
 
-    plt.xticks(ticks=[0, 1], labels=['No print', 'Print'])
-    plt.ylim(-0.05, 0.5)
-    plt.yticks(ticks=[0, 0.5, 1.0])
+        # X locations for the groups
+        ind = np.arange(n_categories)  
+        width = 0.35  # the width of the bars
 
-    for patch in ax.patches:
-        bb = patch.get_bbox()
-        color = patch.get_facecolor()
-        p_bbox = get_fancy_bbox(bb, "round,pad=-0.005,rounding_size=0.02", color, mutation_aspect=0.1)
-        patch.remove()
-        ax.add_patch(p_bbox)
+        # Generate bar plots
+        fig, ax = plt.subplots()
+        rects1 = ax.bar(ind - width/2, control_means, width, yerr=control_sems, label='Control', capsize=5, color='mediumaquamarine')
+        rects2 = ax.bar(ind + width/2, print_means, width, yerr=print_sems, label='Print', capsize=5, color='mediumpurple')
+        
+        # Add some text for labels, title and custom x-axis tick labels, etc.
+        sns.set_theme(style="darkgrid")
+        sns.despine(left=True, bottom=False)
+        ax.yaxis.grid(True, linestyle='-', which='major', color='lightgrey', alpha=0.5, zorder=-100)
+        ax.set_ylabel('Accuracy')
+        ax.set_title('Accuracy by model and condition')
+        ax.set_xticks(ind)
+        ax.set_xticklabels(categories, fontsize=5)
+        ax.legend()
+        
+
+        # Function to attach a text label above each bar in *rects*, displaying its height.
+        # def autolabel(rects):
+        #     for rect in rects:
+        #         height = rect.get_height()
+        #         ax.annotate('{:.2f}'.format(height),
+        #                     xy=(rect.get_x() + rect.get_width() / 2, height),
+        #                     xytext=(0, 3),  # 3 points vertical offset
+        #                     textcoords="offset points",
+        #                     ha='center', va='bottom')
+
+        # # Call the function for each set of bars.
+        # autolabel(rects1)
+        # autolabel(rects2)
 
 
-    plt.tight_layout()
-    plt.show()
-    plt.savefig('testplotgeneration_accuracy.png', dpi=1000)
-    breakpoint()
-    
-    
-    # COMPILE # EVALUATABLE OUTPUTS PER 100
-    CONTROL_evaluatable = [results[f'{args.model.name}_{key}']['Overall accuracy'] for key in CONTROL]
-    PRINT_evaluatable = [results[f'{args.model.name}_{key}']['Overall accuracy'] for key in PRINT]
-    PRINT_1_evaluatable = [results[f'{args.model.name}_{key}']['Overall accuracy'] for key in PRINT_1]
-    PRINT_2_evaluatable = [results[f'{args.model.name}_{key}']['Overall accuracy'] for key in PRINT_2]
-    
-    
-    # CONTROL vs PRINT_1 vs .... vs PRINT_N plot
-    data_accuracy = {
-        'CONTROL' : CONTROL_overallaccuracies,
-        'PRINT_1' : PRINT_1_overallaccuracies,
-        'PRINT_2' : PRINT_2_overallaccuracies
-    }
-    
-    data_evaluatable = {
-        'CONTROL' : CONTROL_evaluatable,
-        'PRINT_1' : PRINT_1_evaluatable,
-        'PRINT_2' : PRINT_2_evaluatable
-    }
-    
-    
-    
+        plt.savefig('TEST.png')
+        
+   
+    many_problems()
 
     
 
@@ -158,3 +141,5 @@ if __name__ == '__main__':
         fire.Fire(main())
     except:
         pass
+
+

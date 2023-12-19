@@ -1,0 +1,2 @@
+- model=codellama-34b-instruct-meta
+- data=row-wisemeanproblem/print

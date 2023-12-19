@@ -30,6 +30,7 @@ logging.basicConfig(level=logging.INFO)
 def main(args: DictConfig) -> None:
     logging.info("Running inference model...")
 
+    seed = 1
 
     # GET INFERENCE MODEL TYPE (HF, OPENAI, ETC.)
     is_meta = "meta" in args.model.model_type.lower()
@@ -61,7 +62,10 @@ def main(args: DictConfig) -> None:
         elif is_hf: 
             model = HFInferenceModel(**args.model.model_config)
             batched_prompts = [f"{data[0]['content']}\n\n{data[1]['content']}"] * args.model.run.batch_size
+            print(f"Began batch prompting...")
+            start = time.time()
             completions = model.batch_prompt(batched_prompts, **args.model.run.completion_config)
+            print(f"==== Completions generated in {time.time() - start} seconds ====")
         elif is_openai:
             args.model.model_config.azure_api.api_key = os.getenv("OPENAI_API_KEY")
             llm = AsyncAzureChatLLM(**args.model.model_config.azure_api)
@@ -92,7 +96,18 @@ def main(args: DictConfig) -> None:
 
         Q, K, V = torch.randn(batch_size, input_len, d_Q), torch.randn(batch_size, output_len, d_K), torch.randn(batch_size, output_len, d_V)
         # in cross attention, K and V are for sequence B, Q is for sequence A
-    
+    elif 'row-wisemeanproblem' in args.data.data_path:
+        m, n, p = 5, 3, 4
+        A = torch.randn(m, n)
+        B = torch.randn(n, p)
+    elif 'maskingproblem' in args.data.data_path:
+        batch_size, n, d = 5, 10, 3
+        X = torch.randn(batch_size, n, d)
+        mask = torch.randint(0, 2, (batch_size, n))
+    elif 'trilproblem' in args.data.data_path:
+        # Define a square matrix of size N x N
+        N = 5
+        M = torch.randn(N, N)
 
     # LOAD SOLUTION
     start = time.time()
@@ -110,11 +125,22 @@ def main(args: DictConfig) -> None:
             if is_meta:
                 responses.append(completion["generation"]["content"])
                 code = extract_code(completion["generation"]["content"])
-            
+            elif is_hf:
++                responses.append(completion)
++                code = extract_code(completion)
             
             exec(code, globals())  ## set output of completion to the function to be tested
             if 'attentionproblem' in args.data.data_path:
                 correct = Solution.algorithm(Q, K, V).shape == algorithm(Q, K, V).shape
+                results.append(correct)
+            elif 'row-wisemeanproblem' in args.data.data_path:
+                correct = torch.allclose(Solution.algorithm(A, B), algorithm(A, B))
+                results.append(correct)
+            elif 'maskingproblem' in args.data.data_path:
+                correct = torch.allclose(Solution.algorithm(X, mask), algorithm(X, mask))
+                results.append(correct)
+            elif 'trilproblem' in args.data.data_path:
+                correct = torch.allclose(Solution.algorithm(M), algorithm(M))
                 results.append(correct)
             evals_count += 1
         except:
@@ -149,18 +175,18 @@ def main(args: DictConfig) -> None:
 
     # WRITE COMPLETIONS TO FILE
     start = time.time()
-    with open(f'completions/{args.data.problem_name}/{args.model.name}/seed{seed}/{args.data.problem_name}_completions.json', "w") as f:
+    with open(f'completions/{args.data.problem_name}/{args.model.name}/seed{seed}/{args.data.name}_completions.json', "w") as f:
         json.dump(completions, f)
     print(f"==== Completions written to file in {time.time() - start} seconds ====")
 
 
     # WRITE METRICS TO FILE
     metrics = {'ID' : output_path,
-            'Overall accuracy' : sum(results) / len(results),
+            'Overall accuracy' : sum(results) / len(results) if len(results) > 0 else 0.0,
             'Evaluated # out of 100' : evals_count,
             'Accuracy among evaluatable outputs' : sum(results) / evals_count if evals_count else None}
     start = time.time()
-    with open(f'metrics/{args.data.problem_name}/{args.model.name}/seed{seed}/{args.data.problem_name}_metrics.json', "w") as f:
+    with open(f'metrics/{args.data.problem_name}/{args.model.name}/seed{seed}/{args.data.name}_metrics.json', "w") as f:
         json.dump(metrics, f)
     print(f"==== Metrics written to file in {time.time() - start} seconds ====")
 

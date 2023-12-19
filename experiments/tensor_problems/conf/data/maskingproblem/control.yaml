@@ -1,0 +1,4 @@
+name: control
+problem_name: maskingproblem
+data_path: data/maskingproblem/control.json
+solution_path: data/maskingproblem/solution.txt

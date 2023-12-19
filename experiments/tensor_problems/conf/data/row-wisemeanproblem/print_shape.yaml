@@ -1,0 +1,4 @@
+name: print_shape
+problem_name: row-wisemeanproblem
+data_path: data/row-wisemeanproblem/print_shape.json
+solution_path: data/row-wisemeanproblem/solution.txt

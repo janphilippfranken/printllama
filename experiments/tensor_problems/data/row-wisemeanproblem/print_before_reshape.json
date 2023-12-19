@@ -1,0 +1,10 @@
+[
+    {
+        "role": "system",
+        "content": "You are given a task and an incorrect solution to the task."
+    },
+    {
+        "role": "user",
+        "content": "Task:\nYou are given two 2D PyTorch tensors A (m x n) and B (n x p), representing matrices. Your task is to compute the matrix multiplication of A and B, then find the row-wise mean of the resulting matrix. The final output should be a 1D tensor of size m, where each element represents the mean of the corresponding row in the product of A and B.\n\nInstructions:\nCorrect the solution to satisfy the task constraints. Do not change the name of the function or the number of arguments. Return the full corrected `algorithm` function.\n\nHint: Use the print statement to help you construct the correct solution.\n\nIncorrect Solution:\n```python\nimport torch\n\ndef algorithm(\n    A: torch.Tensor,\n    B: torch.Tensor\n) -> torch.Tensor:\n    '''\n    args:\n        A: torch.Tensor of shape (m, n)\n        B: torch.Tensor of shape (n, p)\n\n    return:\n        output: torch.Tensor of shape (m)\n    '''\n    product = torch.matmul(A, B)\n    output = torch.mean(product, dim=1)\n    print(f'output shape: {output.shape}')  # prints 'output shape: ' followed by the current output tensor's shape\n    output = output.reshape(-1, 1)\n    return output\n```\n"
+    }
+]

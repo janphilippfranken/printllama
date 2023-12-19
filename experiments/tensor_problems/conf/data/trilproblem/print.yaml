@@ -1,0 +1,4 @@
+name: print
+problem_name: trilproblem
+data_path: data/trilproblem/print.json
+solution_path: data/trilproblem/solution.txt

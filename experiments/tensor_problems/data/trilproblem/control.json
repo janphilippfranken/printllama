@@ -1,0 +1,10 @@
+[
+    {
+        "role": "system",
+        "content": "You are given a task and an incorrect solution to the task."
+    },
+    {
+        "role": "user",
+        "content": "Task:\nYou are given a 2D PyTorch tensor 'M' of shape (N, N). Your task is to create a new tensor 'L' of the same shape, where 'L' is the lower triangular part of 'M'. All the elements above the main diagonal in 'L' should be zeros. You must achieve this using PyTorch tensor operations and list comprehensions.\n\nInstructions:\nCorrect the solution to satisfy the task constraints. Do not change the name of the function or the number of arguments. Return the full corrected ```algorithm``` function.\n\nHint:\n\nIncorrect Solution:\n```python\nimport torch\n\ndef algorithm(M: torch.Tensor) -> torch.Tensor:\n    '''\n    args:\n        M: torch.Tensor of shape (N, N)\n\n    return:\n        L: torch.Tensor of shape (N, N), which is the lower triangular part of M\n    '''\n    N = M.size(0)\n    L = torch.tensor([[M[i, j] if i <= j else 0 for j in range(N)] for i in range(N)])  \n    return L\n```\n"
+    }
+]

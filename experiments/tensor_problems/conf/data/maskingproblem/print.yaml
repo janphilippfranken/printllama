@@ -1,0 +1,4 @@
+name: print
+problem_name: maskingproblem
+data_path: data/maskingproblem/print.json
+solution_path: data/maskingproblem/solution.txt

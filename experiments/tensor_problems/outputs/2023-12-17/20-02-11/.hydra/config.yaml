@@ -1,0 +1,23 @@
+model:
+  hydra:
+    run:
+      dir: outputs
+  model_type: meta
+  name: codellama-7b-instruct-meta
+  model_config:
+    ckpt_dir: /scr/jphilipp/printllama-hgx/codellama/CodeLlama-7b-Instruct/
+    tokenizer_path: /scr/jphilipp/printllama-hgx/codellama/CodeLlama-7b-Instruct/tokenizer.model
+    max_seq_len: 1000
+    max_batch_size: 100
+  run:
+    batch_size: 100
+    verbose: false
+    completion_config:
+      max_gen_len: 2000
+      temperature: 0.1
+      top_p: 0.9
+data:
+  name: print_shape
+  problem_name: row-wisemeanproblem
+  data_path: data/row-wisemeanproblem/print_shape.json
+  solution_path: data/row-wisemeanproblem/solution.txt

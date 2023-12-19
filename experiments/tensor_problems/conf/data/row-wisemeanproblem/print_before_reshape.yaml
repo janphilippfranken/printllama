@@ -1,0 +1,4 @@
+name: print_before_reshape
+problem_name: row-wisemeanproblem
+data_path: data/row-wisemeanproblem/print_before_reshape.json
+solution_path: data/row-wisemeanproblem/solution.txt

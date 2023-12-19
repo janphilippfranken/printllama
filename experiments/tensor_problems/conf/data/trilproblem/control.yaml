@@ -1,0 +1,4 @@
+name: control
+problem_name: trilproblem
+data_path: data/trilproblem/control.json
+solution_path: data/trilproblem/solution.txt

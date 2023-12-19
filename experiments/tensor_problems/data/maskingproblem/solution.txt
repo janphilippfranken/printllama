@@ -1,0 +1,15 @@
+class Solution:
+    def algorithm(
+        X: torch.Tensor,
+        mask: torch.Tensor
+    ) -> torch.Tensor:
+        '''
+        args:
+            X: torch.Tensor of shape (batch_size, n, d)
+            mask: torch.Tensor of shape (batch_size, n)
+        return:
+            output: torch.Tensor of shape (batch_size, n, d)
+        '''
+        mask_expanded = mask.unsqueeze(-1).expand_as(X)
+        output = X * mask_expanded
+        return output

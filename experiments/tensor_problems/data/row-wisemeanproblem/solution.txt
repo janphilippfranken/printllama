@@ -1,0 +1,16 @@
+class Solution:
+    def algorithm(
+        A: torch.Tensor,
+        B: torch.Tensor
+    ) -> torch.Tensor:
+        '''
+        args:
+            A: torch.Tensor of shape (m, n)
+            B: torch.Tensor of shape (n, p)
+
+        return:
+            output: torch.Tensor of shape (m)
+        '''
+        product = torch.matmul(A, B)
+        output = torch.mean(product, dim=1)
+        return output
