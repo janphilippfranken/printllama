@@ -1,5 +1,5 @@
 import os
-NPROC_PER_NODE = 2
+NPROC_PER_NODE = 1
 directory = 'conf/data/trilproblem/'
 
 

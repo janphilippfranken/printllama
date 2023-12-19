@@ -126,8 +126,12 @@ def main(args: DictConfig) -> None:
                 responses.append(completion["generation"]["content"])
                 code = extract_code(completion["generation"]["content"])
             elif is_hf:
-+                responses.append(completion)
-+                code = extract_code(completion)
+                responses.append(completion)
+                code = extract_code(completion)
+            elif is_openai:
+                responses.append(completion)
+                code = extract_code(completion)
+            
             
             exec(code, globals())  ## set output of completion to the function to be tested
             if 'attentionproblem' in args.data.data_path:
