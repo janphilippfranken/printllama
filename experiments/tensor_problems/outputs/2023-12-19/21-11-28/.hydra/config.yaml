@@ -1,0 +1,27 @@
+model:
+  hydra:
+    run:
+      dir: outputs
+  model_type: hf
+  name: mistral-7b-instruct-v02-hf
+  model_config:
+    pretrained_model_name_or_path: mistralai/Mistral-7B-Instruct-v0.2
+    model_id: null
+    load_in_8bit: true
+    device_map: auto
+    torch_dtype: float16
+    model_cache_dir: /scr/jphilipp/printllama-hgx/pretrained_models/
+    tokenizer_cache_dir: /scr/jphilipp/prinllama-hfx/pretrained_models/
+  run:
+    batch_size: 100
+    verbose: false
+    completion_config:
+      do_sample: true
+      temperature: 0.1
+      top_p: 0.9
+      max_new_tokens: 1000
+data:
+  name: print_output
+  problem_name: maindiagonalproblem
+  data_path: data/maindiagonalproblem/print_output.json
+  solution_path: data/maindiagonalproblem/solution.txt

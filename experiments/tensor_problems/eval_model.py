@@ -61,7 +61,10 @@ def main(args: DictConfig) -> None:
             print(f"==== Completions generated in {time.time() - start} seconds ====")
         elif is_hf: 
             model = HFInferenceModel(**args.model.model_config)
-            batched_prompts = [f"{data[0]['content']}\n\n{data[1]['content']}"] * args.model.run.batch_size
+            if 'mistral' in args.model.name.lower():
+                 batched_prompts = [f"<s>[INST]{data[0]['content']}\n\n{data[1]['content']}[/INST]"] * args.model.run.batch_size
+            else:
+                batched_prompts = [f"{data[0]['content']}\n\n{data[1]['content']}"] * args.model.run.batch_size
             print(f"Began batch prompting...")
             start = time.time()
             completions = model.batch_prompt(batched_prompts, **args.model.run.completion_config)
@@ -108,6 +111,9 @@ def main(args: DictConfig) -> None:
         # Define a square matrix of size N x N
         N = 5
         M = torch.randn(N, N)
+    elif 'maindiagonalproblem' in args.data.data_path:
+        n = 5
+        M = torch.randn(n, n)   
 
     # LOAD SOLUTION
     start = time.time()
@@ -145,6 +151,9 @@ def main(args: DictConfig) -> None:
                 results.append(correct)
             elif 'trilproblem' in args.data.data_path:
                 correct = torch.allclose(Solution.algorithm(M), algorithm(M))
+                results.append(correct)
+            elif 'maindiagonalproblem' in args.data.data_path:
+                correct =  torch.allclose(Solution.algorithm(M), algorithm(M))
                 results.append(correct)
             evals_count += 1
         except:

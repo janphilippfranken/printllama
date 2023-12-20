@@ -1,0 +1,4 @@
+name: control
+problem_name: maindiagonalproblem
+data_path: data/maindiagonalproblem/control.json
+solution_path: data/maindiagonalproblem/solution.txt

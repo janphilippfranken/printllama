@@ -1,0 +1,13 @@
+class Solution:
+    def algorithm(M: torch.Tensor) -> torch.Tensor:
+        '''
+        args:
+            M: torch.Tensor of shape (n, n)
+
+        return:
+            output: torch.Tensor of shape (n, n)
+        '''
+        output = torch.zeros_like(M)
+        indices = torch.arange(M.size(0))
+        output[indices, indices] = M[indices, indices]
+        return output

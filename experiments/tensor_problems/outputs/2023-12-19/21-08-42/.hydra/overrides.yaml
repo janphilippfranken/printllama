@@ -1,0 +1,2 @@
+- model=mistral-7b-instruct-v02-hf
+- data=maindiagonalproblem/print_mask

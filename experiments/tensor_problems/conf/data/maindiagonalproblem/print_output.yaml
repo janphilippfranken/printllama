@@ -1,0 +1,4 @@
+name: print_output
+problem_name: maindiagonalproblem
+data_path: data/maindiagonalproblem/print_output.json
+solution_path: data/maindiagonalproblem/solution.txt

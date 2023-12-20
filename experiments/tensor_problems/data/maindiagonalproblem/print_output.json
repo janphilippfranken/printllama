@@ -1,0 +1,10 @@
+[
+    {
+        "role": "system",
+        "content": "You are given a task and an incorrect solution to the task."
+    },
+    {
+        "role": "user",
+        "content": "Task:\nGiven a 2D PyTorch tensor M of shape (n, n), your task is to create a new tensor where all elements are zero except for those on the main diagonal of M. The output tensor should preserve the diagonal elements of M and have the same shape as M.\n\nInstructions:\nCorrect the solution to satisfy the task constraints. Do not change the name of the function or the number of arguments. Return the full corrected ```algorithm``` function.\n\nHint:\nUse the print statement to help you construct the correct solution.\n\nIncorrect Solution:\n```python\nimport torch\n\ndef algorithm(M: torch.Tensor) -> torch.Tensor:\n    '''\n    args:\n        M: torch.Tensor of shape (n, n)\n\n    return:\n        output: torch.Tensor of shape (n, n) with only main diagonal elements from M\n    '''\n    n = M.size(0)\n    mask = torch.eye(n, n)\n    output = mask + M\n    print(f'output: {output}')  # prints 'output: ' followed by the current output tensor\n    return output\n```\n"
+    }
+]

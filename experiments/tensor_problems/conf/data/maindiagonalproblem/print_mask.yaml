@@ -1,0 +1,4 @@
+name: print_mask
+problem_name: maindiagonalproblem
+data_path: data/maindiagonalproblem/print_mask.json
+solution_path: data/maindiagonalproblem/solution.txt
