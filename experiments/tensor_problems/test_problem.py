@@ -2,15 +2,15 @@ import os
 
 
 #problems = ['attentionproblem', 'trilproblem', 'maskingproblem', 'row-wisemeanproblem']
-problems = ['maindiagonalproblem']
-models = ['codellama-7b-meta', 'codellama-7b-instruct-meta', 'codellama-13b-instruct-meta', 'codellama-34b-instruct-meta', 'huggingfaceh4-zephyr-7b-beta-hf', 'mistral-7b-instruct-v02-hf']
+problems = ['HumanEval_0']
+models = ['mistral-7b-instruct-v02-hf', 'huggingfaceh4-zephyr-7b-beta-hf', 'codellama-7b-meta', 'codellama-7b-instruct-meta', 'codellama-13b-instruct-meta', 'codellama-34b-instruct-meta']
 numgpus = {
+    'mistral-7b-instruct-v02-hf' : 1,
+    'huggingfaceh4-zephyr-7b-beta-hf' : 1, 
     'codellama-7b-meta' : 1,
      'codellama-7b-instruct-meta' : 1,
       'codellama-13b-instruct-meta' : 2,
-       'codellama-34b-instruct-meta' : 4,
-       'huggingfaceh4-zephyr-7b-beta-hf' : 1, 
-       'mistral-7b-instruct-v02-hf' : 1
+       'codellama-34b-instruct-meta' : 4
 }
 
 for model in models:

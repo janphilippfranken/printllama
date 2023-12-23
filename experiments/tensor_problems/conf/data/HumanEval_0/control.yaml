@@ -1,0 +1,4 @@
+name: control
+problem_name: HumanEval_0
+data_path: data/HumanEval_0/control.json
+solution_path: data/HumanEval_0/solution.txt

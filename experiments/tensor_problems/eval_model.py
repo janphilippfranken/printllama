@@ -114,6 +114,14 @@ def main(args: DictConfig) -> None:
     elif 'maindiagonalproblem' in args.data.data_path:
         n = 5
         M = torch.randn(n, n)   
+    elif 'HumanEval_0' in args.data.data_path:
+        A, a, a_label = ([1.0, 2.0, 3.9, 4.0, 5.0, 2.2], 0.3, True)
+        B, b, b_label = ([1.0, 2.0, 3.9, 4.0, 5.0, 2.2], 0.05, False)
+        C, c, c_label = ([1.0, 2.0, 5.9, 4.0, 5.0], 0.95, True)
+        D, d, d_label = ([1.0, 2.0, 5.9, 4.0, 5.0], 0.8, False)
+        E, e, e_label = ([1.0, 2.0, 3.0, 4.0, 5.0, 2.0], 0.1, True)
+        F, f, f_label = ([1.1, 2.2, 3.1, 4.1, 5.1], 1.0, True)
+        G, g, g_label = ([1.1, 2.2, 3.1, 4.1, 5.1], 0.5, False)
 
     # LOAD SOLUTION
     start = time.time()
@@ -138,8 +146,9 @@ def main(args: DictConfig) -> None:
                 responses.append(completion)
                 code = extract_code(completion)
             
-            
+            breakpoint()
             exec(code, globals())  ## set output of completion to the function to be tested
+            breakpoint()
             if 'attentionproblem' in args.data.data_path:
                 correct = Solution.algorithm(Q, K, V).shape == algorithm(Q, K, V).shape
                 results.append(correct)
@@ -154,6 +163,9 @@ def main(args: DictConfig) -> None:
                 results.append(correct)
             elif 'maindiagonalproblem' in args.data.data_path:
                 correct =  torch.allclose(Solution.algorithm(M), algorithm(M))
+                results.append(correct)
+            elif 'HumanEval_0' in args.data.data_path:
+                correct = algorithm(A, a) == a_label and algorithm(B, b) == b_label and algorithm(C, c) == c_label and algorithm(D, d) == d_label and algorithm(E, e) == e_label and algorithm(F, f) == f_label and algorithm(G, g) == g_label
                 results.append(correct)
             evals_count += 1
         except:
