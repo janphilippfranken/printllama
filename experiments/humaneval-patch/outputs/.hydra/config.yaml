@@ -1,0 +1,16 @@
+model_type: meta
+model_config:
+  ckpt_dir: /scr/jphilipp/printllama-hgx/codellama/CodeLlama-7b-Instruct/
+  tokenizer_path: /scr/jphilipp/printllama-hgx/codellama/CodeLlama-7b-Instruct/tokenizer.model
+  max_seq_len: 1000
+  max_batch_size: 100
+data:
+  data_path: attentionproblem_data/control.json
+  solution: attentionproblem_data/solution.txt
+run:
+  batch_size: 100
+  verbose: false
+  completion_config:
+    max_gen_len: 2000
+    temperature: 0.1
+    top_p: 0.9
