@@ -4,7 +4,7 @@ from typing import Optional, List, Dict
 import os
 
 import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer
+from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig, set_seed
 
 
 class HFInferenceModel():
@@ -20,15 +20,22 @@ class HFInferenceModel():
         torch_dtype: str = "float16",
         model_cache_dir: str = "/scr/jphilipp/scai/pretrained_models/Mistral-7B-Instruct-v0.1",
         tokenizer_cache_dir: str = "/scr/jphilipp/scai/pretrained_models/Mistral-7B-Instruct-v0.1",
+        seed: int = 1
         ):
         """Initializes HF Inference Model"""
         self.model_id = model_id
+        self.seed = seed
+        set_seed(self.seed)
+        
+        
         # load tokenizer
         self.tokenizer = AutoTokenizer.from_pretrained(
             pretrained_model_name_or_path=pretrained_model_name_or_path, 
             cache_dir=tokenizer_cache_dir,
             token=os.getenv("HF_TOKEN"),
         )
+        
+        
         # check which model we are using
         is_mistral = "mistral" in pretrained_model_name_or_path.lower()
         is_llama_2 = "llama-2" in pretrained_model_name_or_path.lower() or "llama" in pretrained_model_name_or_path.lower() 
@@ -55,6 +62,7 @@ class HFInferenceModel():
             cache_dir=model_cache_dir,
             token=os.getenv("HF_TOKEN"),
         )
+
 
     @property
     def model_type(self):
@@ -95,64 +103,36 @@ class HFInferenceModel():
         do_sample: Optional[bool] = True,
         top_p: Optional[float] = 0.9,
         temperature: Optional[float] = 0.1,
-        log_probs: Optional[bool] = False,
-        log_probs_answer: Optional[bool] = True,
-        log_probs_mcq: Optional[bool] = False,
-        answer_a: Optional[str] = "A",
-        answer_b: Optional[str] = "B",  
-    ):
-        """
-        Batched inferences (either generate or log_probs)
-        """
-        inputs = self.tokenizer(prompts, 
-                        return_tensors="pt", 
-                        padding=True).to(self.model.device)
-        if not log_probs:
+        num_return_sequences: Optional[int] = 1,
+    ) -> List[str]:
+        """Batched generation."""
+        torch.manual_seed(self.seed)
+        
+        
+        # ENCODE BATCH
+        inputs = self.tokenizer(
+            prompts, 
+            add_special_tokens=False,
+            return_tensors="pt", 
+            padding=True,
+        ).to(self.model.device)
+        
+        # SAMPLE NUM_RETURN_SEQUENCES FOR EACH BATCH
+        with torch.backends.cuda.sdp_kernel(enable_flash=True, enable_math=False, enable_mem_efficient=False):
             output = self.model.generate(
                 inputs["input_ids"], 
                 max_new_tokens=max_new_tokens,
                 do_sample=do_sample,
                 top_p=top_p,
                 temperature=temperature,
-            )
-            output = self.tokenizer.batch_decode(output[:, inputs["input_ids"].shape[1]:], skip_special_tokens=True)
-            return output
-        else: 
-            if log_probs_answer:
-                breakpoint()
-                # TODO: Get this to work
-                # get log probs of full sequence + answer 
-                log_probs_a = self.get_log_probs(prompts, answer_a)
-                log_probs_b = self.get_log_probs(prompts, answer_b)
-                results = {
-                    "log_probs_answer_a": log_probs_a,
-                    "log_probs_answer_b": log_probs_b,
-                }
-                
-                return results
-            elif log_probs_mcq:
-                # ask model to generate answer
-                output = self.model.generate(
-                    inputs["input_ids"], 
-                    max_new_tokens=max_new_tokens,
-                    do_sample=do_sample,
-                    top_p=top_p,
-                    temperature=temperature,
-                    output_scores=True,  
-                    return_dict_in_generate=True,
-                )
-                token_id_answer_a = self.tokenizer.encode(answer_a, add_special_tokens=False)[0]
-                token_id_answer_b = self.tokenizer.encode(answer_b, add_special_tokens=False)[0]
-                results = {
-                    "log_probs_answer_a": [],
-                    "log_probs_answer_b": [],
-                }
-                breakpoint()
-                for i in range(len(prompts)):
-                    log_probs = torch.nn.functional.log_softmax(output.scores[0][i], dim=-1)
-                    log_prob_answer_a = log_probs[token_id_answer_a].item()
-                    log_prob_answer_b = log_probs[token_id_answer_b].item()
-                    results["log_probs_answer_a"].append(log_prob_answer_a)
-                    results["log_probs_answer_b"].append(log_prob_answer_b)
-                return results
+                num_return_sequences=num_return_sequences,
+            )[:, inputs['input_ids'].shape[1]:]
+
+        # BATCH DECODE
+        output = self.tokenizer.batch_decode(
+            sequences=output, 
+            skip_special_tokens=True,
+        )
+
+        return output
             

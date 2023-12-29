@@ -15,11 +15,12 @@ model_config:
   tokenizer_cache_dir: /scr/jphilipp/prinllama-hfx/pretrained_models/
 
 run:
-  batch_size: 100
+  seed: 1
+  batch_size: 1
   verbose: false
   completion_config:
     do_sample: true
     temperature: 0.1
     top_p: 0.9
-    max_new_tokens: 1000
-    num_return_sequences: 10
+    max_new_tokens: 300
+    num_return_sequences: 20

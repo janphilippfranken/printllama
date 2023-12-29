@@ -1,3 +1,3 @@
 defaults:
-  - model: codellama-13b-instruct-meta
-  - data: attentionproblem/C_NP_NH_NHD_NID
+  - model: huggingfaceh4-zephyr-7b-beta-hf
+  - data: humaneval-patch-122723
