@@ -5,6 +5,8 @@ import os
 
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig, set_seed
+import accelerate
+import bitsandbytes
 
 
 class HFInferenceModel():
@@ -20,21 +22,18 @@ class HFInferenceModel():
         torch_dtype: str = "float16",
         model_cache_dir: str = "/scr/jphilipp/scai/pretrained_models/Mistral-7B-Instruct-v0.1",
         tokenizer_cache_dir: str = "/scr/jphilipp/scai/pretrained_models/Mistral-7B-Instruct-v0.1",
-        seed: int = 1
+        seed: int = 1,
         ):
         """Initializes HF Inference Model"""
         self.model_id = model_id
         self.seed = seed
         set_seed(self.seed)
-        
-        
         # load tokenizer
         self.tokenizer = AutoTokenizer.from_pretrained(
             pretrained_model_name_or_path=pretrained_model_name_or_path, 
             cache_dir=tokenizer_cache_dir,
             token=os.getenv("HF_TOKEN"),
         )
-        
         
         # check which model we are using
         is_mistral = "mistral" in pretrained_model_name_or_path.lower()
@@ -53,6 +52,8 @@ class HFInferenceModel():
             pass
         else:
             raise ValueError(f"Model not implemented: {pretrained_model_name_or_path}")
+        
+        
         # load model
         self.model = AutoModelForCausalLM.from_pretrained(
             pretrained_model_name_or_path=pretrained_model_name_or_path,
@@ -107,7 +108,6 @@ class HFInferenceModel():
     ) -> List[str]:
         """Batched generation."""
         torch.manual_seed(self.seed)
-        
         
         # ENCODE BATCH
         inputs = self.tokenizer(

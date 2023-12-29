@@ -8,7 +8,7 @@ name: mistral-7b-instruct-v02-hf
 model_config:
   pretrained_model_name_or_path: mistralai/Mistral-7B-Instruct-v0.2
   model_id: # unique identifier for accessing conversation buffer
-  load_in_8bit: true
+  load_in_8bit: false
   device_map: auto
   torch_dtype: float16
   model_cache_dir: /scr/jphilipp/printllama-hgx/pretrained_models/

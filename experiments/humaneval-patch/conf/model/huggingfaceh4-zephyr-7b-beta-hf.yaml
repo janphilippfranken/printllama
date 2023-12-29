@@ -8,7 +8,7 @@ name: huggingfaceh4-zephyr-7b-beta-hf
 model_config:
   pretrained_model_name_or_path: HuggingFaceH4/zephyr-7b-beta
   model_id: # unique identifier for accessing conversation buffer
-  load_in_8bit: true
+  load_in_8bit: false
   device_map: auto
   torch_dtype: float16
   model_cache_dir: /scr/jphilipp/printllama-hgx/pretrained_models/
