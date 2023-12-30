@@ -13,9 +13,9 @@ model_config:
   torch_dtype: float16
   model_cache_dir: /scr/jphilipp/printllama-hgx/pretrained_models/
   tokenizer_cache_dir: /scr/jphilipp/prinllama-hfx/pretrained_models/
+  seed: 1
 
 run:
-  seed: 1
   batch_size: 1
   verbose: false
   completion_config:

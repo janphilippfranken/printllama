@@ -33,7 +33,7 @@ logging.basicConfig(level=logging.INFO)
 def main(args: DictConfig) -> None:
     logging.info("Running inference model...")
 
-    seed = args.model.run.seed
+    seed = args.model.model_config.seed
     
     # GET INFERENCE MODEL TYPE (HF, OPENAI, ETC.)
     is_meta = "meta" in args.model.model_type.lower()
@@ -45,7 +45,13 @@ def main(args: DictConfig) -> None:
     df = pd.read_csv(f'{args.data.path}')
     accs = []
     samples = []
-    local_rank = int(os.getenv('LOCAL_RANK', '0'))
+    
+    
+    if not os.path.exists(f'completions/{args.data.path[5:-4]}/{args.model.name}/'):
+        os.makedirs(f'completions/{args.data.path[5:-4]}/{args.model.name}/')
+    if not os.path.exists(f'metrics/{args.data.path[5:-4]}/{args.model.name}/'):
+        os.makedirs(f'metrics/{args.data.path[5:-4]}/{args.model.name}/')
+    
     # BUILD MODEL AND RUN INFERENCE
     if not args.model.run.verbose:
         if is_hf: 
@@ -58,6 +64,11 @@ def main(args: DictConfig) -> None:
                 
                 start = time.time()
                 for i, row in df.iterrows():
+                    if i % 50 == 0:
+                        with open(f'metrics/{args.data.path[5:-4]}/{args.model.name}/seed{seed}.json', 'w') as f:
+                            json.dump(accs, f)
+                        with open(f'completions/{args.data.path[5:-4]}/{args.model.name}/seed{seed}.json', 'w') as f:
+                            json.dump(samples, f)
                     message = f"""Correct the following solution:
 ```python
 {row['bug']}
@@ -106,6 +117,11 @@ Your output should contain only the corrected code, without explanation or comme
                 B_USER = '<|user|>'
                 B_ASSISTANT = '<|assistant|>'
                 for i, row in df.iterrows():
+                    if i % 50 == 0:
+                        with open(f'metrics/{args.data.path[5:-4]}/{args.model.name}/seed{seed}.json', 'w') as f:
+                            json.dump(accs, f)
+                        with open(f'completions/{args.data.path[5:-4]}/{args.model.name}/seed{seed}.json', 'w') as f:
+                            json.dump(samples, f)
                     message = f"""Correct the following solution:
 ```python
 {row['bug']}
@@ -151,15 +167,10 @@ Your output should contain only the corrected code, without explanation or comme
         else:
             print(f"Model type {args.model.model_type} not yet supported.")
 
-
-    if not os.path.exists(f'completions/{args.data.path[:-4]}/{args.model.name}/'):
-        os.makedirs(f'completions/{args.data.path[:-4]}/{args.model.name}/')
-    if not os.path.exists(f'metrics/{args.data.path[:-4]}/{args.model.name}/'):
-        os.makedirs(f'metrics/{args.data.path[:-4]}/{args.model.name}/')
     
-    with open(f'metrics/{args.data.path[:-4]}/{args.model.name}/'):
+    with open(f'metrics/{args.data.path[5:-4]}/{args.model.name}/seed{seed}.json', 'w') as f:
         json.dump(accs, f)
-    with open(f'completions/{args.data.path[:-4]}/{args.model.name}/'):
+    with open(f'completions/{args.data.path[5:-4]}/{args.model.name}/seed{seed}.json', 'w') as f:
         json.dump(samples, f)
 
 
