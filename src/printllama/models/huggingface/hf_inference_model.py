@@ -62,7 +62,11 @@ class HFInferenceModel():
             device_map=device_map,
             cache_dir=model_cache_dir,
             token=os.getenv("HF_TOKEN"),
+            attn_implementation="flash_attention_2",
+            max_memory=None
         )
+        self.model = torch.compile(self.model)
+        self.model.eval()
 
 
     @property
