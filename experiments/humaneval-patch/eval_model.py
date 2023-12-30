@@ -43,8 +43,8 @@ def main(args: DictConfig) -> None:
     expertise = "You are an expert computer science researcher and programmer, especially skilled at fixing bugs in incorrect algorithms."
    
     df = pd.read_csv(f'{args.data.path}')
-    accs = []
-    samples = []
+    accs = list()
+    samples = list()
     
     
     if not os.path.exists(f'completions/{args.data.path[5:-4]}/{args.model.name}/'):
@@ -172,6 +172,8 @@ Your output should contain only the corrected code, without explanation or comme
         json.dump(accs, f)
     with open(f'completions/{args.data.path[5:-4]}/{args.model.name}/seed{seed}.json', 'w') as f:
         json.dump(samples, f)
+    
+    print(f"==== Finished testing perturbations from {args.data.path[5:-4]} for {args.model.name} ====")
 
 
 if __name__ == '__main__':

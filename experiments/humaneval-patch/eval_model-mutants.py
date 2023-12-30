@@ -185,6 +185,8 @@ Your output should contain only the corrected code, without explanation or comme
         json.dump(accs, f)
     with open(f'completions/{args.data.path[5:-4]}/{args.model.name}/seed{seed}.json', 'w') as f:
         json.dump(samples, f)
+    
+    print(f"==== Finished testing perturbations from {args.data.path[5:-4]} for {args.model.name} ====")
 
 
 if __name__ == '__main__':
