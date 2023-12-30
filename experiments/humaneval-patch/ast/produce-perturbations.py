@@ -26,8 +26,8 @@ def main(args: DictConfig) -> None:
     random.seed(SEED)
     
 
-    def perturb_humaneval(filepath):
-        df = pd.read_csv(filepath)
+    def perturb_humaneval():
+        df = load_dataset('openai_humaneval')['test'].to_pandas()
         df['solution'] = df['prompt'] + df['canonical_solution']
 
         var_perturbations, expr_perturbations, func_perturbations = list(), list(), list()
@@ -79,14 +79,14 @@ def main(args: DictConfig) -> None:
 
         return list(df['solution']), var_perturbations, expr_perturbations, func_perturbations
 
-    solution, variable_changes, expression_changes, func_changes = perturb_humaneval(f'../data/{args.data.path}')
+    solution, variable_changes, expression_changes, func_changes = perturb_humaneval()
     print(f'Dataset size: {len(solution)}')
     print(f'Successful variable perturbations: {len([1 for example in variable_changes if example is not None])}')
     print(f'Successful expression perturbations: {len([1 for example in expression_changes if example is not None])}')
     print(f'Successful function perturbations: {len([1 for example in func_changes if example is not None])}')
     
     
-    original_df = pd.read_csv(f'../data/{args.data.path}')
+    original_df = load_dataset('openai_humaneval')['test'].to_pandas()
     perturb_df = pd.DataFrame({
         'solution' : solution,
         'var changes' : variable_changes,

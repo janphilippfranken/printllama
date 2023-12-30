@@ -14,6 +14,7 @@ import time
 import os
 import signal
 from collections import defaultdict
+from datasets import load_dataset, Dataset
 
 from printllama.helpers import extract_code
 
@@ -41,8 +42,18 @@ def main(args: DictConfig) -> None:
     is_openai = "openai" in args.model.model_type.lower()
 
     expertise = "You are an expert computer science researcher and programmer, especially skilled at fixing bugs in incorrect algorithms."
+    
+    
+    # preprocess
+    df = load_dataset("nuprl/humaneval-py-mutants")['train'].to_pandas()
+    # Exploding 'mutants' column
+    df = df.explode('mutants')
+    df = df.rename(columns={
+        'mutants' : 'bug',
+        'tests' : 'test'
+    })
+
    
-    df = pd.read_csv(f'{args.data.path}')
     accs = []
     samples = []
     local_rank = int(os.getenv('LOCAL_RANK', '0'))
@@ -67,15 +78,15 @@ You will be evaluated based on the following evaluation function, which should r
 ```python
 {row['test']}
 ```
-Your output should contain only the corrected code, without explanation or comments, keeping the original function name {row['entry_point']}. Be as creative as you can under the constraints. Ensure the corrected Python code in your response is enclosed in triple backticks ``` ```.
+Your output should contain only the corrected code, without explanation or comments, keeping the original function name. Be as creative as you can under the constraints. Ensure the corrected Python code in your response is enclosed in triple backticks ``` ```.
 """
-                    print(f"Task {row['task_id']}")
+                    print(f"Task {row['name']}")
                     task_start = time.time()
                     
                     
                     completions = [extract_code(completion) for completion in model.batch_prompt([f'<s>{B_INST}{B_SYS}{expertise}{E_SYS}{message}{E_INST}'], **args.model.run.completion_config)]
+
                     samples.append(completions)
-                    exec(row['test'], globals())
                     passed = list()
                     def signal_handler(signum, frame):
                         raise Exception("Timed out!")
@@ -87,7 +98,7 @@ Your output should contain only the corrected code, without explanation or comme
                         
                         try:
                             exec(completion, globals())
-                            check(globals()[row['entry_point']])
+                            exec(row['test'], globals())
                             passed.append(True)
                         except:
                             passed.append(False)
@@ -115,15 +126,14 @@ You will be evaluated based on the following evaluation function, which should r
 ```python
 {row['test']}
 ```
-Your output should contain only the corrected code, without explanation or comments, keeping the original function name {row['entry_point']}. Be as creative as you can under the constraints. Ensure the corrected Python code in your response is enclosed in triple backticks ``` ```.
+Your output should contain only the corrected code, without explanation or comments, keeping the original function name. Be as creative as you can under the constraints. Ensure the corrected Python code in your response is enclosed in triple backticks ``` ```.
 """
-                    print(f"Task {row['task_id']}")
+                    print(f"Task {row['name']}")
                     task_start = time.time()
                     
                     
                     completions = [extract_code(completion) for completion in model.batch_prompt([f'<s>{B_SYS}{expertise}</s>\n{B_USER}{message}</s>\n{B_ASSISTANT}'], **args.model.run.completion_config)]
                     samples.append(completions)
-                    exec(row['test'], globals())
                     passed = list()
                     def signal_handler(signum, frame):
                         raise Exception("Timed out!")
@@ -135,7 +145,7 @@ Your output should contain only the corrected code, without explanation or comme
                         
                         try:
                             exec(completion, globals())
-                            check(globals()[row['entry_point']])
+                            exec(row['test'], globals())
                             passed.append(True)
                         except:
                             passed.append(False)
