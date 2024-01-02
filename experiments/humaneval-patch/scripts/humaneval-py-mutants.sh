@@ -7,8 +7,8 @@
 #SBATCH --mem=128G 
 #SBATCH --cpus-per-task=16
 #SBATCH --time=48:00:00
-#SBATCH --output=~/research_projects/printllama/experiments/humaneval-patch/job_output.%j.out
-#SBATCH --error=~/research_projects/printllama/experiments/humaneval-patch/job_output.%j.err
+#SBATCH --output=job_output.%j.out
+#SBATCH --error=job_output.%j.err
 
 # Load conda environment
 source /scr/andukuri/miniconda3/etc/profile.d/conda.sh
