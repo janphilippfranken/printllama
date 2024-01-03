@@ -16,8 +16,8 @@ def load_data(file_path):
 file_paths = [
     "metrics/humaneval-patch-control-010224/mistral-7b-instruct-v02-hf/seed1.json",
     "metrics/humaneval-patch-control-010224/huggingfaceh4-zephyr-7b-beta-hf/seed1.json",
-    "metrics/humaneval-patch-control-010224/mistral-7b-instruct-v02-hf/seed1.json",
-    "metrics/humaneval-patch-control-010224/huggingfaceh4-zephyr-7b-beta-hf/seed1.json",
+    "metrics/humaneval-patch-control-010224/mistral-7b-instruct-v02-hf/seed1-filtered.json",
+    "metrics/humaneval-patch-control-010224/huggingfaceh4-zephyr-7b-beta-hf/seed1-filtered.json",
     "metrics/humaneval-patch-manualprint-010124/mistral-7b-instruct-v02-hf/seed1.json",
     "metrics/humaneval-patch-manualprint-010124/huggingfaceh4-zephyr-7b-beta-hf/seed1.json",
     "metrics/humaneval-py-mutants/mistral-7b-instruct-v02-hf/seed1.json",
@@ -26,8 +26,7 @@ file_paths = [
 
 # Loading data
 datasets = [load_data(path) for path in file_paths]
-datasets[2] = datasets[2][0:30] # TODO filter by indices 
-datasets[3] = datasets[3][0:30]
+
 
 # Setting the theme and font
 sns.set_theme(style="darkgrid")
