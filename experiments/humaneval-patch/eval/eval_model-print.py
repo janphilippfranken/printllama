@@ -16,6 +16,7 @@ import signal
 from collections import defaultdict
 from datasets import load_dataset, Dataset
 
+
 from printllama.helpers import extract_code
 
 
@@ -45,13 +46,8 @@ def main(args: DictConfig) -> None:
     
     
     # preprocess
-    df = load_dataset("nuprl/humaneval-py-mutants")['train'].to_pandas()
-    # Exploding 'mutants' column
-    df = df.explode('mutants')
-    df = df.rename(columns={
-        'mutants' : 'bug',
-        'tests' : 'test'
-    })
+    df = pd.read_csv(args.data.path)
+    df = df[df['bugtype'].str.contains("print")]
 
    
     accs = list()
@@ -93,7 +89,7 @@ You will be evaluated based on the following evaluation function, which should r
 ```
 Your output should contain only the corrected code, without explanation or comments, keeping the original function name. Be as creative as you can under the constraints. Ensure the corrected Python code in your response is enclosed in triple backticks ``` ```.
 """
-                    print(f"Task {row['name']}")
+                    print(f"Task {row['task_id']}")
                     task_start = time.time()
                     
                     
@@ -147,7 +143,7 @@ You will be evaluated based on the following evaluation function, which should r
 ```
 Your output should contain only the corrected code, without explanation or comments, keeping the original function name. Be as creative as you can under the constraints. Ensure the corrected Python code in your response is enclosed in triple backticks ``` ```.
 """
-                    print(f"Task {row['name']}")
+                    print(f"Task {row['task_id']}")
                     task_start = time.time()
                     
                     

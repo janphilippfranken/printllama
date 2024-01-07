@@ -14,7 +14,7 @@ import time
 import os
 import signal
 from collections import defaultdict
-from datasets import load_dataset, Dataset
+
 
 from printllama.helpers import extract_code
 
@@ -42,22 +42,17 @@ def main(args: DictConfig) -> None:
     is_openai = "openai" in args.model.model_type.lower()
 
     expertise = "You are an expert computer science researcher and programmer, especially skilled at fixing bugs in incorrect algorithms."
-    
-    
-    # preprocess
-    df = pd.read_csv(args.data.path)
-    df = df[df['bugtype'].str.contains("print")]
-
    
+    df = pd.read_csv(f'{args.data.path}')
     accs = list()
     samples = list()
+    
     
     if not os.path.exists(f'completions/{args.data.path[5:-4]}/{args.model.name}/'):
         os.makedirs(f'completions/{args.data.path[5:-4]}/{args.model.name}/')
     if not os.path.exists(f'metrics/{args.data.path[5:-4]}/{args.model.name}/'):
         os.makedirs(f'metrics/{args.data.path[5:-4]}/{args.model.name}/')
-
-
+    
     # BUILD MODEL AND RUN INFERENCE
     if not args.model.run.verbose:
         if is_hf: 
@@ -71,12 +66,10 @@ def main(args: DictConfig) -> None:
                 start = time.time()
                 for i, row in df.iterrows():
                     if i % 50 == 0:
-                        print("Saving existing results...")
                         with open(f'metrics/{args.data.path[5:-4]}/{args.model.name}/seed{seed}.json', 'w') as f:
                             json.dump(accs, f)
                         with open(f'completions/{args.data.path[5:-4]}/{args.model.name}/seed{seed}.json', 'w') as f:
                             json.dump(samples, f)
-                        
                     message = f"""Correct the following solution:
 ```python
 {row['bug']}
@@ -86,15 +79,15 @@ You will be evaluated based on the following evaluation function, which should r
 ```python
 {row['test']}
 ```
-Your output should contain only the corrected code, without explanation or comments, keeping the original function name. Be as creative as you can under the constraints. Ensure the corrected Python code in your response is enclosed in triple backticks ``` ```.
+Your output should contain only the corrected code, without explanation or comments, keeping the original function name {row['entry_point']}. Be as creative as you can under the constraints. Ensure the corrected Python code in your response is enclosed in triple backticks ``` ```.
 """
                     print(f"Task {row['task_id']}")
                     task_start = time.time()
                     
                     
                     completions = [extract_code(completion) for completion in model.batch_prompt([f'<s>{B_INST}{B_SYS}{expertise}{E_SYS}{message}{E_INST}'], **args.model.run.completion_config)]
-
                     samples.append(completions)
+                    exec(row['test'], globals())
                     passed = list()
                     def signal_handler(signum, frame):
                         raise Exception("Timed out!")
@@ -106,7 +99,7 @@ Your output should contain only the corrected code, without explanation or comme
                         
                         try:
                             exec(completion, globals())
-                            exec(row['test'], globals())
+                            check(globals()[row['entry_point']])
                             passed.append(True)
                         except:
                             passed.append(False)
@@ -126,7 +119,6 @@ Your output should contain only the corrected code, without explanation or comme
                 B_ASSISTANT = '<|assistant|>'
                 for i, row in df.iterrows():
                     if i % 50 == 0:
-                        print("Saving existing results...")
                         with open(f'metrics/{args.data.path[5:-4]}/{args.model.name}/seed{seed}.json', 'w') as f:
                             json.dump(accs, f)
                         with open(f'completions/{args.data.path[5:-4]}/{args.model.name}/seed{seed}.json', 'w') as f:
@@ -140,7 +132,7 @@ You will be evaluated based on the following evaluation function, which should r
 ```python
 {row['test']}
 ```
-Your output should contain only the corrected code, without explanation or comments, keeping the original function name. Be as creative as you can under the constraints. Ensure the corrected Python code in your response is enclosed in triple backticks ``` ```.
+Your output should contain only the corrected code, without explanation or comments, keeping the original function name {row['entry_point']}. Be as creative as you can under the constraints. Ensure the corrected Python code in your response is enclosed in triple backticks ``` ```.
 """
                     print(f"Task {row['task_id']}")
                     task_start = time.time()
@@ -148,6 +140,7 @@ Your output should contain only the corrected code, without explanation or comme
                     
                     completions = [extract_code(completion) for completion in model.batch_prompt([f'<s>{B_SYS}{expertise}</s>\n{B_USER}{message}</s>\n{B_ASSISTANT}'], **args.model.run.completion_config)]
                     samples.append(completions)
+                    exec(row['test'], globals())
                     passed = list()
                     def signal_handler(signum, frame):
                         raise Exception("Timed out!")
@@ -159,7 +152,7 @@ Your output should contain only the corrected code, without explanation or comme
                         
                         try:
                             exec(completion, globals())
-                            exec(row['test'], globals())
+                            check(globals()[row['entry_point']])
                             passed.append(True)
                         except:
                             passed.append(False)
