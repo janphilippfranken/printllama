@@ -24,8 +24,11 @@ file_paths = [
     "metrics/humaneval-py-mutants/huggingfaceh4-zephyr-7b-beta-hf/seed1.json"
 ]
 
+
 # Loading data
 datasets = [load_data(path) for path in file_paths]
+datasets[0] = [item for item, keep in zip(datasets[0], pd.read_csv('data/humaneval-patch-122723.csv')['bug'].notnull()) if keep]
+datasets[1] = [item for item, keep in zip(datasets[1], pd.read_csv('data/humaneval-patch-122723.csv')['bug'].notnull()) if keep]
 
 
 # Setting the theme and font
@@ -40,7 +43,9 @@ std_errs = [1.95 * (np.std(dataset) / np.sqrt(len(dataset))) for dataset in data
 
 
 # Dataset names
-dataset_names = ['patch-control (N = 492)', 'patch-control (N = 30)', 'patch-expert-print (N = 30)', 'py-mutants (N = 600)']
+#dataset_names = ['patch-control (N = 492)', 'patch-control (N = 30)', 'patch-expert-print (N = 30)', 'py-mutants (N = 600)']
+dataset_names = ['patch-control (N = 316)', 'patch-control (N = 30)', 'patch-expert-print (N = 30)', 'py-mutants (N = 600)']
+
 
 # Plotting
 fig, ax = plt.subplots(figsize=(10, 5))
