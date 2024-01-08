@@ -9,18 +9,13 @@ from langchain.schema import (
     SystemMessage
 )
 
-from utils import get_llm, get_vars_from_out
-
-EXPERT_DIR = 'data/humaneval-patch-manualprint-010124.csv'
+from utils import PROMPT_FORMAT, EXPERT_DIR
 
 
-def gen_chat(args):
+def generate_prints(args):
     """
     Generate action, harm, good, preventable cause, external non-prventable cause for both conditions 
     """
-    llm = get_llm(args)
-    
-    
     # GET INFERENCE MODEL TYPE (HF, OPENAI, ETC.)
     is_meta = "meta" in args.model.model_type.lower()
     is_hf = "hf" in args.model.model_type.lower()
@@ -28,16 +23,18 @@ def gen_chat(args):
 
 
     # Load expert prints from manual print dataset
-    df = pd.read_csv(EXPERT_DIR)
-    expert_prints = df[df['bugtype'].str.endswith('print')]['bugtype'].tolist()
+    expert_df = pd.read_csv(EXPERT_DIR)
+    expert_prints = expert_df[expert_df['bugtype'].str.endswith('print')]['bugtype'].tolist()
+    
+    
 
    
-    # Loop over all pairs of names & professions
+    # Loop over all problems
     for i, name in enumerate(names[args.start:args.end]):
         profession = professions[i + args.start]
 
         rand_item = 0#  random.randint(0, args.start - 1) # random example for few shot generation set to 1
-        severity = 'Mild'
+        
 
         for condition in ['CC', 'CoC']:
             prompt_path = f'{PROMPT_DIR}/{condition.lower()}_stage_1_{severity.lower()}.txt'
