@@ -14,6 +14,7 @@ import time
 import os
 import signal
 from collections import defaultdict
+from datasets import load_dataset, Dataset
 
 
 from printllama.helpers import extract_code
@@ -30,7 +31,7 @@ from printllama.models.openai.gpt4 import GPT4Agent
 logging.basicConfig(level=logging.INFO)
 
 
-@hydra.main(version_base=None, config_path="conf", config_name='config')
+@hydra.main(version_base=None, config_path="../conf", config_name='config')
 def main(args: DictConfig) -> None:
     logging.info("Running inference model...")
 
@@ -42,8 +43,13 @@ def main(args: DictConfig) -> None:
     is_openai = "openai" in args.model.model_type.lower()
 
     expertise = "You are an expert computer science researcher and programmer, especially skilled at fixing bugs in incorrect algorithms."
+    
+    
+    # preprocess
+    df = pd.read_csv(args.data.path)
+    if args.condition.type == 'print': df = df[df['bugtype'].str.contains("print")]
+
    
-    df = pd.read_csv(f'{args.data.path}')
     accs = list()
     samples = list()
     
@@ -52,7 +58,8 @@ def main(args: DictConfig) -> None:
         os.makedirs(f'completions/{args.data.path[5:-4]}/{args.model.name}/')
     if not os.path.exists(f'metrics/{args.data.path[5:-4]}/{args.model.name}/'):
         os.makedirs(f'metrics/{args.data.path[5:-4]}/{args.model.name}/')
-    
+
+
     # BUILD MODEL AND RUN INFERENCE
     if not args.model.run.verbose:
         if is_hf: 
@@ -66,10 +73,12 @@ def main(args: DictConfig) -> None:
                 start = time.time()
                 for i, row in df.iterrows():
                     if i % 50 == 0:
+                        print("Saving existing results...")
                         with open(f'metrics/{args.data.path[5:-4]}/{args.model.name}/seed{seed}.json', 'w') as f:
                             json.dump(accs, f)
                         with open(f'completions/{args.data.path[5:-4]}/{args.model.name}/seed{seed}.json', 'w') as f:
                             json.dump(samples, f)
+                        
                     message = f"""Correct the following solution:
 ```python
 {row['bug']}
@@ -86,6 +95,7 @@ Your output should contain only the corrected code, without explanation or comme
                     
                     
                     completions = [extract_code(completion) for completion in model.batch_prompt([f'<s>{B_INST}{B_SYS}{expertise}{E_SYS}{message}{E_INST}'], **args.model.run.completion_config)]
+
                     samples.append(completions)
                     exec(row['test'], globals())
                     passed = list()
@@ -119,6 +129,7 @@ Your output should contain only the corrected code, without explanation or comme
                 B_ASSISTANT = '<|assistant|>'
                 for i, row in df.iterrows():
                     if i % 50 == 0:
+                        print("Saving existing results...")
                         with open(f'metrics/{args.data.path[5:-4]}/{args.model.name}/seed{seed}.json', 'w') as f:
                             json.dump(accs, f)
                         with open(f'completions/{args.data.path[5:-4]}/{args.model.name}/seed{seed}.json', 'w') as f:
@@ -161,6 +172,7 @@ Your output should contain only the corrected code, without explanation or comme
                     
                     
                     accs.append(sum(passed) / len(passed) if len(passed) > 0 else 0.0)
+                    breakpoint()
                     print("Accuracy: ", accs[-1])
                     print(f"Finished in {time.time() - task_start} seconds")
                 
