@@ -1,6 +1,7 @@
 import random
 import csv
 import argparse
+import pandas as pd
 
 from langchain.schema import (
     AIMessage,
@@ -10,52 +11,26 @@ from langchain.schema import (
 
 from utils import get_llm, get_vars_from_out
 
+EXPERT_DIR = 'data/humaneval-patch-manualprint-010124.csv'
 
 
-
-def get_context(name, profession):
-    """
-    Format agent name and profession into full sentence
-    """
-    article = 'an' if profession.strip()[0].lower() in 'aeiou' else 'a'
-    context = f"{name.strip()}, {article} {profession}, faces a moral dilemma. "
-    return context
-
-
-def get_example(names, professions, condition, rand_item, severity):
-    """
-    Pull a random item from csv file to use as a shot
-    """
-    name = names[rand_item]
-    profession = professions[rand_item]
-    context = get_context(name, profession)
-    
-    with open(f'{PROMPT_DIR}/{condition.lower()}_stage_1_{severity.lower()}.csv', 'r') as f:
-        reader = list(csv.reader(f, delimiter=';'))
-        row = reader[rand_item]
-        vars = [elem.strip() for elem in row]
- 
-        return f"""Context: {context}
-                Format
-                Action Opportunity: {vars[0]}
-                Necessary {severity} Harm -> {severity} Good
-                Necessary {severity} Harm: {vars[1]}
-                Very Good: {vars[2]}
-                Other Preventable Cause: {vars[3]}
-                External Non-Preventable Cause: {vars[4]}"""
-                
-def get_human_msg(name, profession, note=""):    
-    return HumanMessage(content=f"Generate a completion for this context: {get_context(name, profession)} {note}")
-
-"""
-Generate action, harm, good, preventable cause, external non-prventable cause for both conditions 
-"""
 def gen_chat(args):
+    """
+    Generate action, harm, good, preventable cause, external non-prventable cause for both conditions 
+    """
     llm = get_llm(args)
+    
+    
+    # GET INFERENCE MODEL TYPE (HF, OPENAI, ETC.)
+    is_meta = "meta" in args.model.model_type.lower()
+    is_hf = "hf" in args.model.model_type.lower()
+    is_openai = "openai" in args.model.model_type.lower()
 
-    # Load names & professions
-    names = open(f'{PROMPT_DIR}/names.txt', 'r').readlines()
-    professions = open(f'{PROMPT_DIR}/professions.txt', 'r').readlines()
+
+    # Load expert prints from manual print dataset
+    df = pd.read_csv(EXPERT_DIR)
+    expert_prints = df[df['bugtype'].str.endswith('print')]['bugtype'].tolist()
+
    
     # Loop over all pairs of names & professions
     for i, name in enumerate(names[args.start:args.end]):

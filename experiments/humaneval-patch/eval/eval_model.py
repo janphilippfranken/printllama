@@ -72,6 +72,8 @@ def main(args: DictConfig) -> None:
                 
                 start = time.time()
                 for i, row in df.iterrows():
+                    if pd.isnull(row['bug']):
+                        continue
                     if i % 50 == 0:
                         print("Saving existing results...")
                         with open(f'metrics/{args.data.path[5:-4]}/{args.model.name}/seed{seed}.json', 'w') as f:
@@ -128,6 +130,8 @@ Your output should contain only the corrected code, without explanation or comme
                 B_USER = '<|user|>'
                 B_ASSISTANT = '<|assistant|>'
                 for i, row in df.iterrows():
+                    if pd.isnull(row['bug']):
+                        continue
                     if i % 50 == 0:
                         print("Saving existing results...")
                         with open(f'metrics/{args.data.path[5:-4]}/{args.model.name}/seed{seed}.json', 'w') as f:
@@ -172,7 +176,6 @@ Your output should contain only the corrected code, without explanation or comme
                     
                     
                     accs.append(sum(passed) / len(passed) if len(passed) > 0 else 0.0)
-                    breakpoint()
                     print("Accuracy: ", accs[-1])
                     print(f"Finished in {time.time() - task_start} seconds")
                 

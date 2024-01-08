@@ -31,7 +31,7 @@ from printllama.models.openai.gpt4 import GPT4Agent
 logging.basicConfig(level=logging.INFO)
 
 
-@hydra.main(version_base=None, config_path="conf", config_name='config')
+@hydra.main(version_base=None, config_path="../conf", config_name='config')
 def main(args: DictConfig) -> None:
     logging.info("Running inference model...")
 
