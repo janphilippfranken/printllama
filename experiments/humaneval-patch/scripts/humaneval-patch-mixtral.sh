@@ -21,12 +21,11 @@ pip install -e .
 # navigate to python script parent directory
 cd ~/research_projects/printllama/experiments/humaneval-patch
 
-# Array of model types
-model_types=("huggingfaceh4-zephyr-7b-beta-hf" "mistral-7b-instruct-v02-hf")
+echo "Running model: $model_type"
+python eval/eval_model.py data=humaneval-patch-122723-30noprint model=mixtral-7b-vllm +condition=control
 
-# Loop through model types
-for model_type in "${model_types[@]}"
-do
-    echo "Running model: $model_type"
-    torchrun --nproc_per_node 1 --master_port 0 eval/eval_model.py data=humaneval-patch-manualprint-010124 model=$model_type +condition=print
-done
+echo "Running model: $model_type"
+python eval/eval_model.py data=humaneval-patch-122723-noNaN model=mixtral-7b-vllm +condition=control
+
+echo "Running model: $model_type"
+python eval/eval_model.py data=humaneval-patch-manualprint-010124 model=mixtral-7b-vllm +condition=print

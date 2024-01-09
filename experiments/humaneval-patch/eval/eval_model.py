@@ -46,7 +46,7 @@ def main(args: DictConfig) -> None:
     
     
     # preprocess
-    df = pd.read_csv(args.data.path).head(1)
+    df = pd.read_csv(args.data.path)
     if args.condition.type == 'print': df = df[df['bugtype'].str.contains("print")]
 
    

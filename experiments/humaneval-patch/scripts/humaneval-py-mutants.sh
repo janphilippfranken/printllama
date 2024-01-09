@@ -28,5 +28,5 @@ model_types=("huggingfaceh4-zephyr-7b-beta-hf" "mistral-7b-instruct-v02-hf")
 for model_type in "${model_types[@]}"
 do
     echo "Running model: $model_type"
-    torchrun --nproc_per_node 1 --master_port 0 eval_model-mutants.py model=$model_type
+    torchrun --nproc_per_node 1 --master_port 0 eval/eval_model-mutants.py model=$model_type
 done

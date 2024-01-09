@@ -1,7 +1,12 @@
 import random
+import os
 import csv
 import argparse
 import pandas as pd
+import hydra
+from omegaconf import DictConfig
+import argparse
+import fire
 
 from langchain.schema import (
     AIMessage,
@@ -9,7 +14,19 @@ from langchain.schema import (
     SystemMessage
 )
 
-from utils import PROMPT_FORMAT, EXPERT_DIR
+from printllama.helpers import extract_code
+from printllama.models.openai.azure import AsyncAzureChatLLM
+from printllama.models.openai.gpt4 import GPT4Agent
+
+from utils import REPAIR_PROMPT_FORMAT, PRINT_SYSTEM_MESSAGE, EXPERT_DIR, PATCH_DIR, NUM_INSERTIONS
+
+
+def chunker(seq, size):
+    """
+    Returns chunks of a list seq as sublists of length size
+    """
+    return (seq[pos:pos + size] for pos in range(0, len(seq), size))
+
 
 
 def generate_prints(args):
@@ -20,68 +37,65 @@ def generate_prints(args):
     is_meta = "meta" in args.model.model_type.lower()
     is_hf = "hf" in args.model.model_type.lower()
     is_openai = "openai" in args.model.model_type.lower()
+    
+    if not (is_openai):
+            print(f"Model type {args.model.model_type} not yet supported.")
+            return []
+        
+    if is_openai:
+        args.model.model_config.azure_api.api_key = os.getenv("OPENAI_API_KEY")
+        llm = AsyncAzureChatLLM(**args.model.model_config.azure_api)
+        model = GPT4Agent(llm=llm, **args.model.run.completion_config)
 
-
+    # Load humaneval-patch dataset
+    df = pd.read_csv(PATCH_DIR)
+    
     # Load expert prints from manual print dataset
     expert_df = pd.read_csv(EXPERT_DIR)
-    expert_prints = expert_df[expert_df['bugtype'].str.endswith('print')]['bugtype'].tolist()
+    bugs = df[expert_df['bugtype'].str.endswith('print')]['bug'].tolist()
+    expert_prints = expert_df[expert_df['bugtype'].str.endswith('print')]['bug'].tolist()
     
-    
-
    
-    # Loop over all problems
-    for i, name in enumerate(names[args.start:args.end]):
-        profession = professions[i + args.start]
-
-        rand_item = 0#  random.randint(0, args.start - 1) # random example for few shot generation set to 1
+    prompts = list()
+    # Loop over all problems and generate few-shot prompts
+    for i, row in df.iterrows():
+        few_shot_indices = random.sample(list(range(len(expert_prints))), 3)
+        prompt = []
+        for j in few_shot_indices:
+            prompt.append(bugs[j])
+            prompt.append(expert_prints[j])
+        prompts.append(prompt)
+    
+    # insertions, a list of len(df) lists of size args.run.completion_config.n each
+    insertions = list()
+    for prompt_chunk in chunker(prompts, args.model.run.batch_size):
+        # TODO: Add hf, meta, and vllm functionality here
+        if not (is_openai):
+            print(f"Model type {args.model.model_type} not yet supported.")
+            return []
+        
+        if is_openai:
+            completions = model.batch_prompt(
+                    system_message=PRINT_SYSTEM_MESSAGE, 
+                    messages=prompt_chunk,
+            )
+            completions = [[extract_code(insertion) for insertion in insertion_attempts] for insertion_attempts in completions]
+            breakpoint()
+        insertions.extend(completions)
+        
+    return insertions
+    
+    
+        
         
 
-        for condition in ['CC', 'CoC']:
-            prompt_path = f'{PROMPT_DIR}/{condition.lower()}_stage_1_{severity.lower()}.txt'
-            system_prompt = open(prompt_path, 'r').read().strip()
-
-            example = get_example(names, professions, condition, rand_item, severity)
-
-            system_message = SystemMessage(content=system_prompt)
-            human_message_0 = get_human_msg(names[rand_item], professions[rand_item])
-            ai_message_0 = AIMessage(content=example)
-            human_message_1 = get_human_msg(name, profession, f"Reminder: You must follow this structure: {system_prompt}")
-
-            # Messages sent to model
-            msgs = [system_message, human_message_0, ai_message_0, human_message_1]
-            responses = llm.generate([msgs], stop=["System:"], **args.model.run.completion_config)
-
-            for generation in responses.generations[0]:
-                if args.verbose:
-                    print(f"------ Generated Story ------")
-                    print(generation.text)
-                    print("------------ Fin --------------")
-
-                vars = get_vars_from_out(generation.text)
-                assert(len(vars) == 5) # TODO - change this later
-                breakpoint()
-                with open(f'{DATA_DIR}/{condition.lower()}_stage_1_{severity.lower()}.csv', 'a') as csvfile:
-                    writer = csv.writer(csvfile, delimiter=';')
-                    writer.writerow(vars)
-
-                # breakpoint()
-
-def gen_story(args):
-    pass  
-
-parser = argparse.ArgumentParser()
-parser.add_argument('--start', type=int, default=10, help='start index')
-parser.add_argument('--end', type=int, default=12, help='end index')
-parser.add_argument('--model', type=str, default='openai/gpt-4-0613', help='model name')
-parser.add_argument('--temperature', type=float, default=0, help='temperature')
-parser.add_argument('--max_tokens', type=int, default=300, help='max tokens')
-# change num completions to 10
-parser.add_argument('--num_completions', type=int, default=1, help='number of completions')
-parser.add_argument('--num_shots', type=int, default=3, help='number of shots')
-parser.add_argument('--num_stories', type=int, default=2, help='number of stories to generate')
-parser.add_argument('--verbose', type=bool, default=True, help='verbose')
-parser.add_argument('--api', type=str, default='azure', help='which api to use')
+@hydra.main(version_base=None, config_path="../conf", config_name='config')
+def main(args: DictConfig):
+    generate_prints(args)
+    return 0
 
 if __name__ == "__main__":
-    args = parser.parse_args()
-    gen_chat(args)
+    try:
+        fire.Fire(main())
+    except:
+        pass
