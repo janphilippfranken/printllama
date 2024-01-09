@@ -17,3 +17,4 @@ sentencepiece
 trl
 pyext
 vllm
+langchain
