@@ -3,6 +3,7 @@ from typing import (
     Dict,
     List, 
 )
+import time
 
 import asyncio
 
@@ -92,7 +93,13 @@ class GPT4Agent():
         # Get the prompt
         messages = self.get_prompt(system_message=system_message, user_message=message)
         # Get the response
-        response = await self.get_response(messages=messages)
+        for i in range(100):
+            try:
+                response = await self.get_response(messages=messages)
+                break
+            except:
+                time.sleep(3)
+                
         # Get Cost
         cost = self.calc_cost(response=response)
         print(f"Cost for running gpt4: {cost}")

@@ -16,3 +16,4 @@ fire
 sentencepiece
 trl
 pyext
+vllm

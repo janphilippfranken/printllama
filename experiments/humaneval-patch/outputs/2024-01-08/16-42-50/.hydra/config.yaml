@@ -1,0 +1,21 @@
+model:
+  hydra:
+    run:
+      dir: outputs
+  model_type: vllm
+  name: mixtral_7b_base
+  model_config:
+    model: mistralai/Mixtral-8x7B-v0.1
+    download_dir: /scr/jphilipp/scai/pretrained_models/Mixtral-8x7B-v0.1
+    dtype: auto
+    tensor_parallel_size: 2
+  run:
+    completion_config:
+      temperature: 0.1
+      top_p: 0.9
+      max_new_tokens: 400
+      num_return_sequences: 20
+data:
+  path: data/humaneval-patch-122723-30noprint.csv
+condition:
+  type: control

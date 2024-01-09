@@ -1,0 +1,2 @@
+- model=mixtral-7b-vllm
+- data=humaneval-patch-122723-30noprint

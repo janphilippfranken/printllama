@@ -16,7 +16,7 @@ import signal
 from collections import defaultdict
 from datasets import load_dataset, Dataset
 
-from utils import PROMPT_FORMAT, signal_handler
+from utils import PROMPT_FORMAT, EXPERTISE, signal_handler
 from printllama.helpers import extract_code
 
 
@@ -25,6 +25,7 @@ from printllama.models.codellama_meta.generation import Llama
 from printllama.models.huggingface.hf_inference_model import HFInferenceModel
 from printllama.models.openai.azure import AsyncAzureChatLLM
 from printllama.models.openai.gpt4 import GPT4Agent
+from printllama.models.vllm_models.inference_model import VLLMInferenceModel
 
 
 # logging
@@ -34,15 +35,14 @@ logging.basicConfig(level=logging.INFO)
 @hydra.main(version_base=None, config_path="../conf", config_name='config')
 def main(args: DictConfig) -> None:
     logging.info("Running inference model...")
-
     seed = args.model.model_config.seed
+    
     
     # GET INFERENCE MODEL TYPE (HF, OPENAI, ETC.)
     is_meta = "meta" in args.model.model_type.lower()
     is_hf = "hf" in args.model.model_type.lower()
     is_openai = "openai" in args.model.model_type.lower()
-
-    expertise = "You are an expert computer science researcher and programmer, especially skilled at fixing bugs in incorrect algorithms."
+    is_vllm = "vllm" in args.model.model_type.lower()
     
     
     # preprocess
@@ -62,7 +62,7 @@ def main(args: DictConfig) -> None:
 
     # BUILD MODEL AND RUN INFERENCE
     if not args.model.run.verbose:
-        if not (is_openai or is_hf):
+        if not (is_openai or is_hf or is_vllm):
             print(f"Model type {args.model.model_type} not yet supported.")
             return -1
         
@@ -72,6 +72,8 @@ def main(args: DictConfig) -> None:
             model = GPT4Agent(llm=llm, **args.model.run.completion_config)
         elif is_hf:
             model = HFInferenceModel(**args.model.model_config)
+        elif is_vllm:
+            model = VLLMInferenceModel(**args.model.model_config)
         
         
         start = time.time()
@@ -91,7 +93,7 @@ def main(args: DictConfig) -> None:
             if is_openai:
                 print(f"Began batch prompting...")
                 completions = model.batch_prompt(
-                    system_message=expertise, 
+                    system_message=EXPERTISE, 
                     messages=[message] * args.model.run.batch_size,
                 )
                 completions = [extract_code(completion) for completion in completions]
@@ -101,13 +103,19 @@ def main(args: DictConfig) -> None:
                     # MISTRAL INST SPECIAL TOKENS
                     B_INST, E_INST = "[INST]", "[/INST]"
                     B_SYS, E_SYS = "<<SYS>>\n", "\n<</SYS>>\n\n"
-                    completions = [extract_code(completion) for completion in model.batch_prompt([f'<s>{B_INST}{B_SYS}{expertise}{E_SYS}{message}{E_INST}'], **args.model.run.completion_config)]
+                    completions = [extract_code(completion) for completion in model.batch_prompt([f'<s>{B_INST}{B_SYS}{EXPERTISE}{E_SYS}{message}{E_INST}'], **args.model.run.completion_config)]
                 elif 'zephyr' in args.model.name.lower():
                     # ZEPHYR INST SPECIAL TOKENS
                     B_SYS = '<|system|>'
                     B_USER = '<|user|>'
                     B_ASSISTANT = '<|assistant|>'
-                    completions = [extract_code(completion) for completion in model.batch_prompt([f'<s>{B_SYS}{expertise}</s>\n{B_USER}{message}</s>\n{B_ASSISTANT}'], **args.model.run.completion_config)]
+                    completions = [extract_code(completion) for completion in model.batch_prompt([f'<s>{B_SYS}{EXPERTISE}</s>\n{B_USER}{message}</s>\n{B_ASSISTANT}'], **args.model.run.completion_config)]
+            elif is_vllm:
+                if 'mixtral' in args.model.name.lower():
+                    # MISTRAL INST SPECIAL TOKENS
+                    B_INST, E_INST = "[INST]", "[/INST]"
+                    B_SYS, E_SYS = "<<SYS>>\n", "\n<</SYS>>\n\n"
+                    completions = [extract_code(completion) for completion in model.batch_prompt([f'<s>{B_INST}{B_SYS}{EXPERTISE}{E_SYS}{message}{E_INST}'], **args.model.run.completion_config)]
             samples.append(completions)
             
             
