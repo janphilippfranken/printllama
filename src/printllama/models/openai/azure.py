@@ -33,6 +33,9 @@ class AsyncAzureChatLLM:
         """
         Make an async API call.
         """
-        return await self.client.chat.completions.create(
-            messages=messages, 
-            **kwargs)
+        try:
+            return await self.client.chat.completions.create(
+                messages=messages, 
+                **kwargs)
+        except:
+            breakpoint()

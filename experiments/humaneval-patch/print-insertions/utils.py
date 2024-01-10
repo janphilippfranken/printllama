@@ -10,10 +10,7 @@ You will be evaluated based on the following evaluation function, which should r
 Your output should contain only the corrected code, without explanation or comments, keeping the original function name {}. Be as creative as you can under the constraints. Ensure the corrected Python code in your response is enclosed in triple backticks ``` ```.
 """
 
-PRINT_SYSTEM_MESSAGE = """
-"""
+PRINT_SYSTEM_MESSAGE = """You are an expert computer scientist at programmer, skilled at inserting useful print statements into incorrect code chunks - without actually correcting the code - in order to help a user later debug their incorrect solution."""
 
 PATCH_DIR = 'data/humaneval-patch-122723.csv'
 EXPERT_DIR = 'data/humaneval-patch-manualprint-010124.csv'
-
-NUM_INSERTIONS = 20

@@ -4,8 +4,8 @@
 #SBATCH --partition=cocoflops
 #SBATCH -w cocoflops-hgx-1
 #SBATCH --gres=gpu:1  # Requesting one GPU
-#SBATCH --mem=128G 
-#SBATCH --cpus-per-task=30
+#SBATCH --mem=64G 
+#SBATCH --cpus-per-task=16
 #SBATCH --time=48:00:00
 #SBATCH --output=job_output.%j.out
 #SBATCH --error=job_output.%j.err
