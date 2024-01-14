@@ -78,7 +78,9 @@ def main(args: DictConfig) -> None:
         
         
         start = time.time()
-        for name, group in df.groupby('task_id'):
+
+        for name, group in df.groupby(['task_id', 'bugtype']):
+            print(f"New group: {group}")
             problem_accs = list()
             for i, row in group.iterrows():
                 if pd.isnull(row['bug']): continue
@@ -111,7 +113,8 @@ def main(args: DictConfig) -> None:
                         # MISTRAL INST SPECIAL TOKENS
                         B_INST, E_INST = "[INST]", "[/INST]"
                         B_SYS, E_SYS = "<<SYS>>\n", "\n<</SYS>>\n\n"
-                        completions = [extract_code(completion) for completion in model.batch_prompt([f'<s>{B_INST}{B_SYS}{EXPERTISE}{E_SYS}{message}{E_INST}'], **args.model.run.completion_config)]
+                        completions = model.batch_prompt([f'<s>{B_INST} {B_SYS}{EXPERTISE}{E_SYS}{message}{E_INST}'], **args.model.run.completion_config)
+                        completions = [extract_code(completion) for completion in completions]
                 samples.append(completions)
                 
                 
@@ -139,10 +142,11 @@ def main(args: DictConfig) -> None:
             
             #TODO: Find max accuracy print from problem_accs, append row to final_df
             max_acc_index = problem_accs.index(max(problem_accs))
-            selected_prints_df = selected_prints_df.append(group.iloc[max_acc_index])
+            selected_prints_df = pd.concat([selected_prints_df, pd.DataFrame([group.iloc[max_acc_index]])], axis=0, ignore_index=True)
         print(f"==== Completions generated in {time.time() - start} seconds ====")
     
     
+    selected_prints_df.to_csv(f'data/{args.data.path[5:-4]}-selected-prints-{args.model.name}.csv')
     with open(f'print-insertions/metrics/{args.data.path[5:-4]}/{args.model.name}/seed{seed}.json', 'w') as f:
         json.dump(item_level_accs, f)
     with open(f'print-insertions/completions/{args.data.path[5:-4]}/{args.model.name}/seed{seed}.json', 'w') as f:

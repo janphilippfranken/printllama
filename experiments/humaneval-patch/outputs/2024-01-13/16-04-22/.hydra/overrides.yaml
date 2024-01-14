@@ -1,0 +1,3 @@
+- data=humaneval-patch-print
+- model=mixtral-8x7b-instruct-vllm
+- condition=print

@@ -16,7 +16,7 @@ import signal
 from collections import defaultdict
 from datasets import load_dataset, Dataset
 
-from utils import PROMPT_FORMAT, EXPERTISE, signal_handler
+from utils import PROMPT_FORMAT, EXPERTISE, signal_handler, blockPrint, enablePrint
 from printllama.helpers import extract_code
 
 

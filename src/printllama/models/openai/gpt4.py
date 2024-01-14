@@ -91,13 +91,13 @@ class GPT4Agent():
             A dictionary containing the code model's response and the cost of the performed API call
         """
         messages = self.get_prompt(system_message=system_message, user_message=message)
-        # for i in range(100):
-        #     try:
-        #         response = await self.get_response(messages=messages)
-        #         break
-        #     except:
-        #         time.sleep(1)
-        response = await self.get_response(messages=messages)
+        for i in range(100):
+            try:
+                response = await self.get_response(messages=messages)
+                break
+            except:
+                time.sleep(1)
+        #response = await self.get_response(messages=messages)
         cost = self.calc_cost(response=response)
         logging.info(f"Cost for running gpt4: {cost}")
         full_response = {

@@ -32,7 +32,7 @@ def chunker(seq, size):
 
 def generate_prints(args):
     """
-    Generate action, harm, good, preventable cause, external non-prventable cause for both conditions 
+    Generate print insertion samples for each buggy problem in the data 
     """
     # GET INFERENCE MODEL TYPE (HF, OPENAI, ETC.)
     is_meta = "meta" in args.model.model_type.lower()
@@ -59,14 +59,14 @@ def generate_prints(args):
     expert_prints = expert_df[expert_df['bugtype'].str.endswith('print')]['bug'].tolist()
     
     # keep only first 30 rows for test run
-    df = df[df['bug'].notnull()].head(30)
+    df = df[df['bug'].notnull()]
     
     
    
     prompts = list()
     # Loop over all problems and generate few-shot prompts
     for i, row in df[df['bug'].notnull()].iterrows():
-        few_shot_indices = random.sample(range(0, len(expert_prints)), 3)
+        few_shot_indices = random.sample(range(0, len(expert_prints)), 5)
         prompt = []
         for j in few_shot_indices:
             prompt.append(bugs[j])
@@ -97,8 +97,8 @@ def generate_prints(args):
     print_df['bug'] = insertions
     print_df_exploded = print_df.explode('bug')
     
-    print_df.to_csv('/sailhome/andukuri/research_projects/printllama/experiments/humaneval-patch/data/humaneval-patch-010924-gpt4prints.csv')
-    print_df_exploded.to_csv('/sailhome/andukuri/research_projects/printllama/experiments/humaneval-patch/data/humaneval-patch-010924-gpt4prints-exploded.csv')
+    print_df.to_csv('/sailhome/andukuri/research_projects/printllama/experiments/humaneval-patch/data/humaneval-patch-011224-temp07-gpt4prints.csv')
+    print_df_exploded.to_csv('/sailhome/andukuri/research_projects/printllama/experiments/humaneval-patch/data/humaneval-patch-011224-temp07-gpt4prints-exploded.csv')
     
     
     

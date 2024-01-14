@@ -1,0 +1,1836 @@
+,task_id,prompt,canonical_solution,test,entry_point,solution,bug,bugtype
+0,HumanEval/0,"from typing import List
+
+
+def has_close_elements(numbers: List[float], threshold: float) -> bool:
+    """""" Check if in given list of numbers, are any two numbers closer to each other than
+    given threshold.
+    >>> has_close_elements([1.0, 2.0, 3.0], 0.5)
+    False
+    >>> has_close_elements([1.0, 2.8, 3.0, 4.0, 5.0, 2.0], 0.3)
+    True
+    """"""","for idx, elem in enumerate(numbers):
+        for idx2, elem2 in enumerate(numbers):
+            if idx != idx2:
+                distance = abs(elem - elem2)
+                if distance < threshold:
+                    return True
+
+    return False","METADATA = {
+    'author': 'jt',
+    'dataset': 'test'
+}
+
+
+def check(candidate):
+    assert candidate([1.0, 2.0, 3.9, 4.0, 5.0, 2.2], 0.3) == True
+    assert candidate([1.0, 2.0, 3.9, 4.0, 5.0, 2.2], 0.05) == False
+    assert candidate([1.0, 2.0, 5.9, 4.0, 5.0], 0.95) == True
+    assert candidate([1.0, 2.0, 5.9, 4.0, 5.0], 0.8) == False
+    assert candidate([1.0, 2.0, 3.0, 4.0, 5.0, 2.0], 0.1) == True
+    assert candidate([1.1, 2.2, 3.1, 4.1, 5.1], 1.0) == True
+    assert candidate([1.1, 2.2, 3.1, 4.1, 5.1], 0.5) == False",has_close_elements,"from typing import List
+
+
+def has_close_elements(numbers: List[float], threshold: float) -> bool:
+    """""" Check if in given list of numbers, are any two numbers closer to each other than
+    given threshold.
+    >>> has_close_elements([1.0, 2.0, 3.0], 0.5)
+    False
+    >>> has_close_elements([1.0, 2.8, 3.0, 4.0, 5.0, 2.0], 0.3)
+    True
+    """"""
+    for idx, elem in enumerate(numbers):
+        for idx2, elem2 in enumerate(numbers):
+            if idx != idx2:
+                distance = abs(elem - elem2)
+                if distance < threshold:
+                    return True
+
+    return False","from typing import List
+
+def has_close_elements(numbers: List[float], threshold: float) -> bool:
+    """""" Check if in given list of numbers, are any two numbers closer to each other than
+    given threshold.
+    >>> has_close_elements([1.0, 2.0, 3.0], 0.5)
+    False
+    >>> has_close_elements([1.0, 2.8, 3.0, 4.0, 5.0, 2.0], 0.3)
+    True
+    """"""
+    for (idx, elem) in enumerate(numbers):
+        for (idx2, elem2) in enumerate(numbers):
+            print(threshold)  # prints: 0.5 for the unit test has_close_elements([1.0, 2.0, 3.0], 0.5)
+            if threshold != idx2:
+                distance = abs(elem - elem2)
+                if distance < threshold:
+                    return True
+    return False
+",var-print
+3,HumanEval/3,"from typing import List
+
+
+def below_zero(operations: List[int]) -> bool:
+    """""" You're given a list of deposit and withdrawal operations on a bank account that starts with
+    zero balance. Your task is to detect if at any point the balance of account fallls below zero, and
+    at that point function should return True. Otherwise it should return False.
+    >>> below_zero([1, 2, 3])
+    False
+    >>> below_zero([1, 2, -4, 5])
+    True
+    """"""","balance = 0
+
+    for op in operations:
+        balance += op
+        if balance < 0:
+            return True
+
+    return False","METADATA = {
+    'author': 'jt',
+    'dataset': 'test'
+}
+
+
+def check(candidate):
+    assert candidate([]) == False
+    assert candidate([1, 2, -3, 1, 2, -3]) == False
+    assert candidate([1, 2, -4, 5, 6]) == True
+    assert candidate([1, -1, 2, -2, 5, -5, 4, -4]) == False
+    assert candidate([1, -1, 2, -2, 5, -5, 4, -5]) == True
+    assert candidate([1, -2, 2, -2, 5, -5, 4, -4]) == True",below_zero,"from typing import List
+
+
+def below_zero(operations: List[int]) -> bool:
+    """""" You're given a list of deposit and withdrawal operations on a bank account that starts with
+    zero balance. Your task is to detect if at any point the balance of account fallls below zero, and
+    at that point function should return True. Otherwise it should return False.
+    >>> below_zero([1, 2, 3])
+    False
+    >>> below_zero([1, 2, -4, 5])
+    True
+    """"""
+    balance = 0
+
+    for op in operations:
+        balance += op
+        if balance < 0:
+            return True
+
+    return False","from typing import List
+
+def below_zero(operations: List[int]) -> bool:
+    """""" You're given a list of deposit and withdrawal operations on a bank account that starts with
+    zero balance. Your task is to detect if at any point the balance of account fallls below zero, and
+    at that point function should return True. Otherwise it should return False.
+    >>> below_zero([1, 2, 3])
+    False
+    >>> below_zero([1, 2, -4, 5])
+    True
+    """"""
+    balance = 0
+    for op in operations:
+        balance += op
+        print(balance)  # prints: 1 in the first iteration for the unit test below_zero([1, 2, 3])
+        if op < 0:
+            return True
+    return False
+",var-print
+4,HumanEval/4,"from typing import List
+
+
+def mean_absolute_deviation(numbers: List[float]) -> float:
+    """""" For a given list of input numbers, calculate Mean Absolute Deviation
+    around the mean of this dataset.
+    Mean Absolute Deviation is the average absolute difference between each
+    element and a centerpoint (mean in this case):
+    MAD = average | x - x_mean |
+    >>> mean_absolute_deviation([1.0, 2.0, 3.0, 4.0])
+    1.0
+    """"""","    mean = sum(numbers) / len(numbers)
+    return sum(abs(x - mean) for x in numbers) / len(numbers)
+","METADATA = {
+    'author': 'jt',
+    'dataset': 'test'
+}
+
+
+def check(candidate):
+    assert abs(candidate([1.0, 2.0, 3.0]) - 2.0/3.0) < 1e-6
+    assert abs(candidate([1.0, 2.0, 3.0, 4.0]) - 1.0) < 1e-6
+    assert abs(candidate([1.0, 2.0, 3.0, 4.0, 5.0]) - 6.0/5.0) < 1e-6",mean_absolute_deviation,"from typing import List
+
+
+def mean_absolute_deviation(numbers: List[float]) -> float:
+    """""" For a given list of input numbers, calculate Mean Absolute Deviation
+    around the mean of this dataset.
+    Mean Absolute Deviation is the average absolute difference between each
+    element and a centerpoint (mean in this case):
+    MAD = average | x - x_mean |
+    >>> mean_absolute_deviation([1.0, 2.0, 3.0, 4.0])
+    1.0
+    """"""
+    mean = sum(numbers) / len(numbers)
+    return sum(abs(x - mean) for x in numbers) / len(numbers)","from typing import List
+
+def mean_absolute_deviation(numbers: List[float]) -> float:
+    """""" For a given list of input numbers, calculate Mean Absolute Deviation
+    around the mean of this dataset.
+    Mean Absolute Deviation is the average absolute difference between each
+    element and a centerpoint (mean in this case):
+    MAD = average | x - x_mean |
+    >>> mean_absolute_deviation([1.0, 2.0, 3.0, 4.0])
+    1.0
+    """"""
+    mean = sum(numbers) / sum(numbers)
+    print(mean)  # prints: 1 for the unit test mean_absolute_deviation([1.0, 2.0, 3.0, 4.0])
+    return sum((abs(x - mean) for x in numbers)) / len(numbers)
+",var-print
+5,HumanEval/5,"from typing import List
+
+
+def intersperse(numbers: List[int], delimeter: int) -> List[int]:
+    """""" Insert a number 'delimeter' between every two consecutive elements of input list `numbers'
+    >>> intersperse([], 4)
+    []
+    >>> intersperse([1, 2, 3], 4)
+    [1, 4, 2, 4, 3]
+    """"""","if not numbers:
+        return []
+
+    result = []
+
+    for n in numbers[:-1]:
+        result.append(n)
+        result.append(delimeter)
+
+    result.append(numbers[-1])
+
+    return result","METADATA = {
+    'author': 'jt',
+    'dataset': 'test'
+}
+
+
+def check(candidate):
+    assert candidate([], 7) == []
+    assert candidate([5, 6, 3, 2], 8) == [5, 8, 6, 8, 3, 8, 2]
+    assert candidate([2, 2, 2], 2) == [2, 2, 2, 2, 2]",intersperse,"from typing import List
+
+
+def intersperse(numbers: List[int], delimeter: int) -> List[int]:
+    """""" Insert a number 'delimeter' between every two consecutive elements of input list `numbers'
+    >>> intersperse([], 4)
+    []
+    >>> intersperse([1, 2, 3], 4)
+    [1, 4, 2, 4, 3]
+    """"""
+    if not numbers:
+        return []
+
+    result = []
+
+    for n in numbers[:-1]:
+        result.append(n)
+        result.append(delimeter)
+
+    result.append(numbers[-1])
+
+    return result","from typing import List
+
+def intersperse(numbers: List[int], delimeter: int) -> List[int]:
+    """""" Insert a number 'delimeter' between every two consecutive elements of input list `numbers'
+    >>> intersperse([], 4)
+    []
+    >>> intersperse([1, 2, 3], 4)
+    [1, 4, 2, 4, 3]
+    """"""
+    if not numbers:
+        return []
+    result = []
+    print(result)  # prints: [] for the unit test intersperse([], 4)
+    for n in result[:-1]:
+        result.append(n)
+        result.append(delimeter)
+    result.append(numbers[-1])
+    return result
+",var-print
+7,HumanEval/7,"from typing import List
+
+
+def filter_by_substring(strings: List[str], substring: str) -> List[str]:
+    """""" Filter an input list of strings only for ones that contain given substring
+    >>> filter_by_substring([], 'a')
+    []
+    >>> filter_by_substring(['abc', 'bacd', 'cde', 'array'], 'a')
+    ['abc', 'bacd', 'array']
+    """"""
+","    return [x for x in strings if substring in x]
+","
+
+METADATA = {
+    'author': 'jt',
+    'dataset': 'test'
+}
+
+
+def check(candidate):
+    assert candidate([], 'john') == []
+    assert candidate(['xxx', 'asd', 'xxy', 'john doe', 'xxxAAA', 'xxx'], 'xxx') == ['xxx', 'xxxAAA', 'xxx']
+    assert candidate(['xxx', 'asd', 'aaaxxy', 'john doe', 'xxxAAA', 'xxx'], 'xx') == ['xxx', 'aaaxxy', 'xxxAAA', 'xxx']
+    assert candidate(['grunt', 'trumpet', 'prune', 'gruesome'], 'run') == ['grunt', 'prune']
+",filter_by_substring,"from typing import List
+
+
+def filter_by_substring(strings: List[str], substring: str) -> List[str]:
+    """""" Filter an input list of strings only for ones that contain given substring
+    >>> filter_by_substring([], 'a')
+    []
+    >>> filter_by_substring(['abc', 'bacd', 'cde', 'array'], 'a')
+    ['abc', 'bacd', 'array']
+    """"""
+    return [x for x in strings if substring in x]
+","from typing import List
+
+def filter_by_substring(strings: List[str], substring: str) -> List[str]:
+    """""" Filter an input list of strings only for ones that contain given substring
+    >>> filter_by_substring([], 'a')
+    []
+    >>> filter_by_substring(['abc', 'bacd', 'cde', 'array'], 'a')
+    ['abc', 'bacd', 'array']
+    """"""
+    print(substring in substring)  # prints: True for the unit test filter_by_substring([], 'a')
+    return [x for x in strings if substring in substring]
+",var-print
+8,HumanEval/8,"from typing import List, Tuple
+
+
+def sum_product(numbers: List[int]) -> Tuple[int, int]:
+    """""" For a given list of integers, return a tuple consisting of a sum and a product of all the integers in a list.
+    Empty sum should be equal to 0 and empty product should be equal to 1.
+    >>> sum_product([])
+    (0, 1)
+    >>> sum_product([1, 2, 3, 4])
+    (10, 24)
+    """"""","sum_value = 0
+    prod_value = 1
+
+    for n in numbers:
+        sum_value += n
+        prod_value *= n
+    return sum_value, prod_value","METADATA = {
+    'author': 'jt',
+    'dataset': 'test'
+}
+
+
+def check(candidate):
+    assert candidate([]) == (0, 1)
+    assert candidate([1, 1, 1]) == (3, 1)
+    assert candidate([100, 0]) == (100, 0)
+    assert candidate([3, 5, 7]) == (3 + 5 + 7, 3 * 5 * 7)
+    assert candidate([10]) == (10, 10)",sum_product,"from typing import List, Tuple
+
+
+def sum_product(numbers: List[int]) -> Tuple[int, int]:
+    """""" For a given list of integers, return a tuple consisting of a sum and a product of all the integers in a list.
+    Empty sum should be equal to 0 and empty product should be equal to 1.
+    >>> sum_product([])
+    (0, 1)
+    >>> sum_product([1, 2, 3, 4])
+    (10, 24)
+    """"""
+    sum_value = 0
+    prod_value = 1
+
+    for n in numbers:
+        sum_value += n
+        prod_value *= n
+    return sum_value, prod_value","from typing import List, Tuple
+
+def sum_product(numbers: List[int]) -> Tuple[int, int]:
+    """""" For a given list of integers, return a tuple consisting of a sum and a product of all the integers in a list.
+    Empty sum should be equal to 0 and empty product should be equal to 1.
+    >>> sum_product([])
+    (0, 1)
+    >>> sum_product([1, 2, 3, 4])
+    (10, 24)
+    """"""
+    sum_value = 0
+    prod_value = 1
+    for n in numbers:
+        sum_value += n
+        prod_value *= n
+    print((prod_value, prod_value))  # prints: (24, 24) for the unit test sum_product([1, 2, 3, 4])
+    return (prod_value, prod_value)
+",var-print
+9,HumanEval/9,"from typing import List, Tuple
+
+
+def rolling_max(numbers: List[int]) -> List[int]:
+    """""" From a given list of integers, generate a list of rolling maximum element found until given moment
+    in the sequence.
+    >>> rolling_max([1, 2, 3, 2, 3, 4, 2])
+    [1, 2, 3, 3, 3, 4, 4]
+    """"""","    running_max = None
+    result = []
+
+    for n in numbers:
+        if running_max is None:
+            running_max = n
+        else:
+            running_max = max(running_max, n)
+
+        result.append(running_max)
+
+    return result
+","METADATA = {
+    'author': 'jt',
+    'dataset': 'test'
+}
+
+
+def check(candidate):
+    assert candidate([]) == []
+    assert candidate([1, 2, 3, 4]) == [1, 2, 3, 4]
+    assert candidate([4, 3, 2, 1]) == [4, 4, 4, 4]
+    assert candidate([3, 2, 3, 100, 3]) == [3, 3, 3, 100, 100]",rolling_max,"from typing import List, Tuple
+
+
+def rolling_max(numbers: List[int]) -> List[int]:
+    """""" From a given list of integers, generate a list of rolling maximum element found until given moment
+    in the sequence.
+    >>> rolling_max([1, 2, 3, 2, 3, 4, 2])
+    [1, 2, 3, 3, 3, 4, 4]
+    """"""
+    running_max = None
+    result = []
+
+    for n in numbers:
+        if running_max is None:
+            running_max = n
+        else:
+            running_max = max(running_max, n)
+
+        result.append(running_max)
+
+    return result","from typing import List, Tuple
+
+def rolling_max(numbers: List[int]) -> List[int]:
+    """""" From a given list of integers, generate a list of rolling maximum element found until given moment
+    in the sequence.
+    >>> rolling_max([1, 2, 3, 2, 3, 4, 2])
+    [1, 2, 3, 3, 3, 4, 4]
+    """"""
+    running_max = None
+    result = []
+    for n in numbers:
+        if running_max is None:
+            running_max = n
+        else:
+            running_max = max(running_max, n)
+        result.append(running_max)
+    print(running_max)  # prints: 4 for the unit test rolling_max([1, 2, 3, 2, 3, 4, 2])
+    return running_max
+",var-print
+10,HumanEval/10,"def is_palindrome(string: str) -> bool:
+    """""" Test if given string is a palindrome """"""
+    return string == string[::-1]
+
+
+def make_palindrome(string: str) -> str:
+    """""" Find the shortest palindrome that begins with a supplied string.
+    Algorithm idea is simple:
+    - Find the longest postfix of supplied string that is a palindrome.
+    - Append to the end of the string reverse of a string prefix that comes before the palindromic suffix.
+    >>> make_palindrome('')
+    ''
+    >>> make_palindrome('cat')
+    'catac'
+    >>> make_palindrome('cata')
+    'catac'
+    """"""","if not string:
+        return ''
+
+    beginning_of_suffix = 0
+
+    while not is_palindrome(string[beginning_of_suffix:]):
+        beginning_of_suffix += 1
+
+    return string + string[:beginning_of_suffix][::-1]","
+
+METADATA = {
+    'author': 'jt',
+    'dataset': 'test'
+}
+
+
+def check(candidate):
+    assert candidate('') == ''
+    assert candidate('x') == 'x'
+    assert candidate('xyz') == 'xyzyx'
+    assert candidate('xyx') == 'xyx'
+    assert candidate('jerry') == 'jerryrrej'
+",make_palindrome,"def is_palindrome(string: str) -> bool:
+    """""" Test if given string is a palindrome """"""
+    return string == string[::-1]
+
+
+def make_palindrome(string: str) -> str:
+    """""" Find the shortest palindrome that begins with a supplied string.
+    Algorithm idea is simple:
+    - Find the longest postfix of supplied string that is a palindrome.
+    - Append to the end of the string reverse of a string prefix that comes before the palindromic suffix.
+    >>> make_palindrome('')
+    ''
+    >>> make_palindrome('cat')
+    'catac'
+    >>> make_palindrome('cata')
+    'catac'
+    """"""
+    if not string:
+        return ''
+
+    beginning_of_suffix = 0
+
+    while not is_palindrome(string[beginning_of_suffix:]):
+        beginning_of_suffix += 1
+
+    return string + string[:beginning_of_suffix][::-1]","def is_palindrome(string: str) -> bool:
+    """""" Test if given string is a palindrome """"""
+    return string == string[::-1]
+
+def make_palindrome(string: str) -> str:
+    """""" Find the shortest palindrome that begins with a supplied string.
+    Algorithm idea is simple:
+    - Find the longest postfix of supplied string that is a palindrome.
+    - Append to the end of the string reverse of a string prefix that comes before the palindromic suffix.
+    >>> make_palindrome('')
+    ''
+    >>> make_palindrome('cat')
+    'catac'
+    >>> make_palindrome('cata')
+    'catac'
+    """"""
+    print(is_palindrome is None)  # prints: False for the unit test make_palindrome('')
+    if not is_palindrome:
+        return ''
+    beginning_of_suffix = 0
+    while not is_palindrome(string[beginning_of_suffix:]):
+        beginning_of_suffix += 1
+    return string + string[:beginning_of_suffix][::-1]
+",var-print
+12,HumanEval/12,"from typing import List, Optional
+
+
+def longest(strings: List[str]) -> Optional[str]:
+    """""" Out of list of strings, return the longest one. Return the first one in case of multiple
+    strings of the same length. Return None in case the input list is empty.
+    >>> longest([])
+
+    >>> longest(['a', 'b', 'c'])
+    'a'
+    >>> longest(['a', 'bb', 'ccc'])
+    'ccc'
+    """"""
+","    if not strings:
+        return None
+
+    maxlen = max(len(x) for x in strings)
+    for s in strings:
+        if len(s) == maxlen:
+            return s
+","
+
+METADATA = {
+    'author': 'jt',
+    'dataset': 'test'
+}
+
+
+def check(candidate):
+    assert candidate([]) == None
+    assert candidate(['x', 'y', 'z']) == 'x'
+    assert candidate(['x', 'yyy', 'zzzz', 'www', 'kkkk', 'abc']) == 'zzzz'
+",longest,"from typing import List, Optional
+
+
+def longest(strings: List[str]) -> Optional[str]:
+    """""" Out of list of strings, return the longest one. Return the first one in case of multiple
+    strings of the same length. Return None in case the input list is empty.
+    >>> longest([])
+
+    >>> longest(['a', 'b', 'c'])
+    'a'
+    >>> longest(['a', 'bb', 'ccc'])
+    'ccc'
+    """"""
+    if not strings:
+        return None
+
+    maxlen = max(len(x) for x in strings)
+    for s in strings:
+        if len(s) == maxlen:
+            return s
+","from typing import List, Optional
+
+def longest(strings: List[str]) -> Optional[str]:
+    """""" Out of list of strings, return the longest one. Return the first one in case of multiple
+    strings of the same length. Return None in case the input list is empty.
+    >>> longest([])
+
+    >>> longest(['a', 'b', 'c'])
+    'a'
+    >>> longest(['a', 'bb', 'ccc'])
+    'ccc'
+    """"""
+    if not strings:
+        return None
+    print(len(strings))  # prints: 3 for the unit test longest(['a', 'b', 'c'])
+    maxlen = max((len(strings) for x in strings))
+    for s in strings:
+        if len(s) == maxlen:
+            return s
+",var-print
+14,HumanEval/14,"from typing import List
+
+
+def all_prefixes(string: str) -> List[str]:
+    """""" Return list of all prefixes from shortest to longest of the input string
+    >>> all_prefixes('abc')
+    ['a', 'ab', 'abc']
+    """"""
+","result = []
+
+    for i in range(len(string)):
+        result.append(string[:i+1])
+    return result","
+
+METADATA = {
+    'author': 'jt',
+    'dataset': 'test'
+}
+
+
+def check(candidate):
+    assert candidate('') == []
+    assert candidate('asdfgh') == ['a', 'as', 'asd', 'asdf', 'asdfg', 'asdfgh']
+    assert candidate('WWW') == ['W', 'WW', 'WWW']
+",all_prefixes,"from typing import List
+
+
+def all_prefixes(string: str) -> List[str]:
+    """""" Return list of all prefixes from shortest to longest of the input string
+    >>> all_prefixes('abc')
+    ['a', 'ab', 'abc']
+    """"""
+    result = []
+
+    for i in range(len(string)):
+        result.append(string[:i+1])
+    return result","from typing import List
+
+def all_prefixes(string: str) -> List[str]:
+    """""" Return list of all prefixes from shortest to longest of the input string
+    >>> all_prefixes('abc')
+    ['a', 'ab', 'abc']
+    """"""
+    result = []
+    print(len(result))  # prints: 0 in the first iteration of the unit test all_prefixes('abc')
+    for i in range(len(result)):
+        result.append(string[:i + 1])
+    return result
+",var-print
+164,HumanEval/0,"from typing import List
+
+
+def has_close_elements(numbers: List[float], threshold: float) -> bool:
+    """""" Check if in given list of numbers, are any two numbers closer to each other than
+    given threshold.
+    >>> has_close_elements([1.0, 2.0, 3.0], 0.5)
+    False
+    >>> has_close_elements([1.0, 2.8, 3.0, 4.0, 5.0, 2.0], 0.3)
+    True
+    """"""","for idx, elem in enumerate(numbers):
+        for idx2, elem2 in enumerate(numbers):
+            if idx != idx2:
+                distance = abs(elem - elem2)
+                if distance < threshold:
+                    return True
+
+    return False","METADATA = {
+    'author': 'jt',
+    'dataset': 'test'
+}
+
+
+def check(candidate):
+    assert candidate([1.0, 2.0, 3.9, 4.0, 5.0, 2.2], 0.3) == True
+    assert candidate([1.0, 2.0, 3.9, 4.0, 5.0, 2.2], 0.05) == False
+    assert candidate([1.0, 2.0, 5.9, 4.0, 5.0], 0.95) == True
+    assert candidate([1.0, 2.0, 5.9, 4.0, 5.0], 0.8) == False
+    assert candidate([1.0, 2.0, 3.0, 4.0, 5.0, 2.0], 0.1) == True
+    assert candidate([1.1, 2.2, 3.1, 4.1, 5.1], 1.0) == True
+    assert candidate([1.1, 2.2, 3.1, 4.1, 5.1], 0.5) == False",has_close_elements,"from typing import List
+
+
+def has_close_elements(numbers: List[float], threshold: float) -> bool:
+    """""" Check if in given list of numbers, are any two numbers closer to each other than
+    given threshold.
+    >>> has_close_elements([1.0, 2.0, 3.0], 0.5)
+    False
+    >>> has_close_elements([1.0, 2.8, 3.0, 4.0, 5.0, 2.0], 0.3)
+    True
+    """"""
+    for idx, elem in enumerate(numbers):
+        for idx2, elem2 in enumerate(numbers):
+            if idx != idx2:
+                distance = abs(elem - elem2)
+                if distance < threshold:
+                    return True
+
+    return False","from typing import List
+
+def has_close_elements(numbers: List[float], threshold: float) -> bool:
+    """""" Check if in given list of numbers, are any two numbers closer to each other than
+    given threshold.
+    >>> has_close_elements([1.0, 2.0, 3.0], 0.5)
+    False
+    >>> has_close_elements([1.0, 2.8, 3.0, 4.0, 5.0, 2.0], 0.3)
+    True
+    """"""
+    for (idx, elem) in enumerate(numbers):
+        for (idx2, elem2) in enumerate(numbers):
+            if idx != idx2:
+                print(elem / elem2)  # prints: 0.5 in the first execution of this line for the unit test has_close_elements([1.0, 2.0, 3.0], 0.5)
+                distance = abs(elem / elem2)
+                if distance < threshold:
+                    return True
+    return False
+",expr-print
+166,HumanEval/2,"def truncate_number(number: float) -> float:
+    """""" Given a positive floating point number, it can be decomposed into
+    and integer part (largest integer smaller than given number) and decimals
+    (leftover part always smaller than 1).
+
+    Return the decimal part of the number.
+    >>> truncate_number(3.5)
+    0.5
+    """"""",return number % 1.0,"METADATA = {
+    'author': 'jt',
+    'dataset': 'test'
+}
+
+
+def check(candidate):
+    assert candidate(3.5) == 0.5
+    assert abs(candidate(1.33) - 0.33) < 1e-6
+    assert abs(candidate(123.456) - 0.456) < 1e-6",truncate_number,"def truncate_number(number: float) -> float:
+    """""" Given a positive floating point number, it can be decomposed into
+    and integer part (largest integer smaller than given number) and decimals
+    (leftover part always smaller than 1).
+
+    Return the decimal part of the number.
+    >>> truncate_number(3.5)
+    0.5
+    """"""
+    return number % 1.0","def truncate_number(number: float) -> float:
+    """""" Given a positive floating point number, it can be decomposed into
+    and integer part (largest integer smaller than given number) and decimals
+    (leftover part always smaller than 1).
+
+    Return the decimal part of the number.
+    >>> truncate_number(3.5)
+    0.5
+    """"""
+    print(number + 1.0)  # prints: 4.5 for the unit test truncate_number(3.5)
+    return number + 1.0
+",expr-print
+167,HumanEval/3,"from typing import List
+
+
+def below_zero(operations: List[int]) -> bool:
+    """""" You're given a list of deposit and withdrawal operations on a bank account that starts with
+    zero balance. Your task is to detect if at any point the balance of account fallls below zero, and
+    at that point function should return True. Otherwise it should return False.
+    >>> below_zero([1, 2, 3])
+    False
+    >>> below_zero([1, 2, -4, 5])
+    True
+    """"""","balance = 0
+
+    for op in operations:
+        balance += op
+        if balance < 0:
+            return True
+
+    return False","METADATA = {
+    'author': 'jt',
+    'dataset': 'test'
+}
+
+
+def check(candidate):
+    assert candidate([]) == False
+    assert candidate([1, 2, -3, 1, 2, -3]) == False
+    assert candidate([1, 2, -4, 5, 6]) == True
+    assert candidate([1, -1, 2, -2, 5, -5, 4, -4]) == False
+    assert candidate([1, -1, 2, -2, 5, -5, 4, -5]) == True
+    assert candidate([1, -2, 2, -2, 5, -5, 4, -4]) == True",below_zero,"from typing import List
+
+
+def below_zero(operations: List[int]) -> bool:
+    """""" You're given a list of deposit and withdrawal operations on a bank account that starts with
+    zero balance. Your task is to detect if at any point the balance of account fallls below zero, and
+    at that point function should return True. Otherwise it should return False.
+    >>> below_zero([1, 2, 3])
+    False
+    >>> below_zero([1, 2, -4, 5])
+    True
+    """"""
+    balance = 0
+
+    for op in operations:
+        balance += op
+        if balance < 0:
+            return True
+
+    return False","from typing import List
+
+def below_zero(operations: List[int]) -> bool:
+    """""" You're given a list of deposit and withdrawal operations on a bank account that starts with
+    zero balance. Your task is to detect if at any point the balance of account fallls below zero, and
+    at that point function should return True. Otherwise it should return False.
+    >>> below_zero([1, 2, 3])
+    False
+    >>> below_zero([1, 2, -4, 5])
+    True
+    """"""
+    balance = 0
+    for op in operations:
+        balance -= op
+        print(balance)  # prints: -1 in the first iteration for the unit test below_zero([1, 2, 3])
+        if balance < 0:
+            return True
+    return False
+",expr-print
+168,HumanEval/4,"from typing import List
+
+
+def mean_absolute_deviation(numbers: List[float]) -> float:
+    """""" For a given list of input numbers, calculate Mean Absolute Deviation
+    around the mean of this dataset.
+    Mean Absolute Deviation is the average absolute difference between each
+    element and a centerpoint (mean in this case):
+    MAD = average | x - x_mean |
+    >>> mean_absolute_deviation([1.0, 2.0, 3.0, 4.0])
+    1.0
+    """"""","    mean = sum(numbers) / len(numbers)
+    return sum(abs(x - mean) for x in numbers) / len(numbers)
+","METADATA = {
+    'author': 'jt',
+    'dataset': 'test'
+}
+
+
+def check(candidate):
+    assert abs(candidate([1.0, 2.0, 3.0]) - 2.0/3.0) < 1e-6
+    assert abs(candidate([1.0, 2.0, 3.0, 4.0]) - 1.0) < 1e-6
+    assert abs(candidate([1.0, 2.0, 3.0, 4.0, 5.0]) - 6.0/5.0) < 1e-6",mean_absolute_deviation,"from typing import List
+
+
+def mean_absolute_deviation(numbers: List[float]) -> float:
+    """""" For a given list of input numbers, calculate Mean Absolute Deviation
+    around the mean of this dataset.
+    Mean Absolute Deviation is the average absolute difference between each
+    element and a centerpoint (mean in this case):
+    MAD = average | x - x_mean |
+    >>> mean_absolute_deviation([1.0, 2.0, 3.0, 4.0])
+    1.0
+    """"""
+    mean = sum(numbers) / len(numbers)
+    return sum(abs(x - mean) for x in numbers) / len(numbers)","from typing import List
+
+def mean_absolute_deviation(numbers: List[float]) -> float:
+    """""" For a given list of input numbers, calculate Mean Absolute Deviation
+    around the mean of this dataset.
+    Mean Absolute Deviation is the average absolute difference between each
+    element and a centerpoint (mean in this case):
+    MAD = average | x - x_mean |
+    >>> mean_absolute_deviation([1.0, 2.0, 3.0, 4.0])
+    1.0
+    """"""
+    mean = sum(numbers) / len(numbers)
+    print(mean)  # prints: 2.5 for the unit test mean_absolute_deviation([1.0, 2.0, 3.0, 4.0])
+    return sum((abs(x // mean) for x in numbers)) / len(numbers)
+",expr-print
+172,HumanEval/8,"from typing import List, Tuple
+
+
+def sum_product(numbers: List[int]) -> Tuple[int, int]:
+    """""" For a given list of integers, return a tuple consisting of a sum and a product of all the integers in a list.
+    Empty sum should be equal to 0 and empty product should be equal to 1.
+    >>> sum_product([])
+    (0, 1)
+    >>> sum_product([1, 2, 3, 4])
+    (10, 24)
+    """"""","sum_value = 0
+    prod_value = 1
+
+    for n in numbers:
+        sum_value += n
+        prod_value *= n
+    return sum_value, prod_value","METADATA = {
+    'author': 'jt',
+    'dataset': 'test'
+}
+
+
+def check(candidate):
+    assert candidate([]) == (0, 1)
+    assert candidate([1, 1, 1]) == (3, 1)
+    assert candidate([100, 0]) == (100, 0)
+    assert candidate([3, 5, 7]) == (3 + 5 + 7, 3 * 5 * 7)
+    assert candidate([10]) == (10, 10)",sum_product,"from typing import List, Tuple
+
+
+def sum_product(numbers: List[int]) -> Tuple[int, int]:
+    """""" For a given list of integers, return a tuple consisting of a sum and a product of all the integers in a list.
+    Empty sum should be equal to 0 and empty product should be equal to 1.
+    >>> sum_product([])
+    (0, 1)
+    >>> sum_product([1, 2, 3, 4])
+    (10, 24)
+    """"""
+    sum_value = 0
+    prod_value = 1
+
+    for n in numbers:
+        sum_value += n
+        prod_value *= n
+    return sum_value, prod_value","from typing import List, Tuple
+
+def sum_product(numbers: List[int]) -> Tuple[int, int]:
+    """""" For a given list of integers, return a tuple consisting of a sum and a product of all the integers in a list.
+    Empty sum should be equal to 0 and empty product should be equal to 1.
+    >>> sum_product([])
+    (0, 1)
+    >>> sum_product([1, 2, 3, 4])
+    (10, 24)
+    """"""
+    sum_value = 0
+    prod_value = 1
+    for n in numbers:
+        sum_value += n
+        prod_value ^= n
+        print(prod_value)  # prints: 0 in the first iteration for the unit test sum_product([1, 2, 3, 4])
+    return (sum_value, prod_value)
+",expr-print
+174,HumanEval/10,"def is_palindrome(string: str) -> bool:
+    """""" Test if given string is a palindrome """"""
+    return string == string[::-1]
+
+
+def make_palindrome(string: str) -> str:
+    """""" Find the shortest palindrome that begins with a supplied string.
+    Algorithm idea is simple:
+    - Find the longest postfix of supplied string that is a palindrome.
+    - Append to the end of the string reverse of a string prefix that comes before the palindromic suffix.
+    >>> make_palindrome('')
+    ''
+    >>> make_palindrome('cat')
+    'catac'
+    >>> make_palindrome('cata')
+    'catac'
+    """"""","if not string:
+        return ''
+
+    beginning_of_suffix = 0
+
+    while not is_palindrome(string[beginning_of_suffix:]):
+        beginning_of_suffix += 1
+
+    return string + string[:beginning_of_suffix][::-1]","
+
+METADATA = {
+    'author': 'jt',
+    'dataset': 'test'
+}
+
+
+def check(candidate):
+    assert candidate('') == ''
+    assert candidate('x') == 'x'
+    assert candidate('xyz') == 'xyzyx'
+    assert candidate('xyx') == 'xyx'
+    assert candidate('jerry') == 'jerryrrej'
+",make_palindrome,"def is_palindrome(string: str) -> bool:
+    """""" Test if given string is a palindrome """"""
+    return string == string[::-1]
+
+
+def make_palindrome(string: str) -> str:
+    """""" Find the shortest palindrome that begins with a supplied string.
+    Algorithm idea is simple:
+    - Find the longest postfix of supplied string that is a palindrome.
+    - Append to the end of the string reverse of a string prefix that comes before the palindromic suffix.
+    >>> make_palindrome('')
+    ''
+    >>> make_palindrome('cat')
+    'catac'
+    >>> make_palindrome('cata')
+    'catac'
+    """"""
+    if not string:
+        return ''
+
+    beginning_of_suffix = 0
+
+    while not is_palindrome(string[beginning_of_suffix:]):
+        beginning_of_suffix += 1
+
+    return string + string[:beginning_of_suffix][::-1]","def is_palindrome(string: str) -> bool:
+    """""" Test if given string is a palindrome """"""
+    return string == string[::-1]
+
+def make_palindrome(string: str) -> str:
+    """""" Find the shortest palindrome that begins with a supplied string.
+    Algorithm idea is simple:
+    - Find the longest postfix of supplied string that is a palindrome.
+    - Append to the end of the string reverse of a string prefix that comes before the palindromic suffix.
+    >>> make_palindrome('')
+    ''
+    >>> make_palindrome('cat')
+    'catac'
+    >>> make_palindrome('cata')
+    'catac'
+    """"""
+    if not string:
+        return ''
+    beginning_of_suffix = 0
+    while not is_palindrome(string[beginning_of_suffix:]):
+        beginning_of_suffix -= 1
+        print(beginning_of_suffix)  # prints: -1 in the first iteration for the unit test make_palindrome('cat')
+    return string + string[:beginning_of_suffix][::-1]
+",expr-print
+177,HumanEval/13,"def greatest_common_divisor(a: int, b: int) -> int:
+    """""" Return a greatest common divisor of two integers a and b
+    >>> greatest_common_divisor(3, 5)
+    1
+    >>> greatest_common_divisor(25, 15)
+    5
+    """"""","    while b:
+        a, b = b, a % b
+    return a
+","METADATA = {
+    'author': 'jt',
+    'dataset': 'test'
+}
+
+
+def check(candidate):
+    assert candidate(3, 7) == 1
+    assert candidate(10, 15) == 5
+    assert candidate(49, 14) == 7
+    assert candidate(144, 60) == 12",greatest_common_divisor,"def greatest_common_divisor(a: int, b: int) -> int:
+    """""" Return a greatest common divisor of two integers a and b
+    >>> greatest_common_divisor(3, 5)
+    1
+    >>> greatest_common_divisor(25, 15)
+    5
+    """"""
+    while b:
+        a, b = b, a % b
+    return a","def greatest_common_divisor(a: int, b: int) -> int:
+    """""" Return a greatest common divisor of two integers a and b
+    >>> greatest_common_divisor(3, 5)
+    1
+    >>> greatest_common_divisor(25, 15)
+    5
+    """"""
+    while b:
+        print(a / b)  # prints: 0.6 in the first iteration for the unit test greatest_common_divisor(3, 5)
+        (a, b) = (b, a / b)
+    return a
+",expr-print
+178,HumanEval/14,"from typing import List
+
+
+def all_prefixes(string: str) -> List[str]:
+    """""" Return list of all prefixes from shortest to longest of the input string
+    >>> all_prefixes('abc')
+    ['a', 'ab', 'abc']
+    """"""
+","result = []
+
+    for i in range(len(string)):
+        result.append(string[:i+1])
+    return result","
+
+METADATA = {
+    'author': 'jt',
+    'dataset': 'test'
+}
+
+
+def check(candidate):
+    assert candidate('') == []
+    assert candidate('asdfgh') == ['a', 'as', 'asd', 'asdf', 'asdfg', 'asdfgh']
+    assert candidate('WWW') == ['W', 'WW', 'WWW']
+",all_prefixes,"from typing import List
+
+
+def all_prefixes(string: str) -> List[str]:
+    """""" Return list of all prefixes from shortest to longest of the input string
+    >>> all_prefixes('abc')
+    ['a', 'ab', 'abc']
+    """"""
+    result = []
+
+    for i in range(len(string)):
+        result.append(string[:i+1])
+    return result","from typing import List
+
+def all_prefixes(string: str) -> List[str]:
+    """""" Return list of all prefixes from shortest to longest of the input string
+    >>> all_prefixes('abc')
+    ['a', 'ab', 'abc']
+    """"""
+    result = []
+    for i in range(len(string)):
+        print(i * 1)  # prints: 0 in the first iteration for the unit test all_prefixes('abc')
+        result.append(string[:i * 1])
+    return result
+",expr-print
+179,HumanEval/15,"def string_sequence(n: int) -> str:
+    """""" Return a string containing space-delimited numbers starting from 0 upto n inclusive.
+    >>> string_sequence(0)
+    '0'
+    >>> string_sequence(5)
+    '0 1 2 3 4 5'
+    """"""",return ' '.join([str(x) for x in range(n + 1)]),"METADATA = {
+    'author': 'jt',
+    'dataset': 'test'
+}
+
+
+def check(candidate):
+    assert candidate(0) == '0'
+    assert candidate(3) == '0 1 2 3'
+    assert candidate(10) == '0 1 2 3 4 5 6 7 8 9 10'",string_sequence,"def string_sequence(n: int) -> str:
+    """""" Return a string containing space-delimited numbers starting from 0 upto n inclusive.
+    >>> string_sequence(0)
+    '0'
+    >>> string_sequence(5)
+    '0 1 2 3 4 5'
+    """"""
+    return ' '.join([str(x) for x in range(n + 1)])","def string_sequence(n: int) -> str:
+    """""" Return a string containing space-delimited numbers starting from 0 upto n inclusive.
+    >>> string_sequence(0)
+    '0'
+    >>> string_sequence(5)
+    '0 1 2 3 4 5'
+    """"""
+    print(n - 1)  # prints: 4 for the unit test string_sequence(5)
+    return ' '.join([str(x) for x in range(n - 1)])
+",expr-print
+182,HumanEval/18,"def how_many_times(string: str, substring: str) -> int:
+    """""" Find how many times a given substring can be found in the original string. Count overlaping cases.
+    >>> how_many_times('', 'a')
+    0
+    >>> how_many_times('aaa', 'a')
+    3
+    >>> how_many_times('aaaa', 'aa')
+    3
+    """"""","times = 0
+
+    for i in range(len(string) - len(substring) + 1):
+        if string[i:i+len(substring)] == substring:
+            times += 1
+
+    return times","METADATA = {
+    'author': 'jt',
+    'dataset': 'test'
+}
+
+
+def check(candidate):
+    assert candidate('', 'x') == 0
+    assert candidate('xyxyxyx', 'x') == 4
+    assert candidate('cacacacac', 'cac') == 4
+    assert candidate('john doe', 'john') == 1",how_many_times,"def how_many_times(string: str, substring: str) -> int:
+    """""" Find how many times a given substring can be found in the original string. Count overlaping cases.
+    >>> how_many_times('', 'a')
+    0
+    >>> how_many_times('aaa', 'a')
+    3
+    >>> how_many_times('aaaa', 'aa')
+    3
+    """"""
+    times = 0
+
+    for i in range(len(string) - len(substring) + 1):
+        if string[i:i+len(substring)] == substring:
+            times += 1
+
+    return times","def how_many_times(string: str, substring: str) -> int:
+    """""" Find how many times a given substring can be found in the original string. Count overlaping cases.
+    >>> how_many_times('', 'a')
+    0
+    >>> how_many_times('aaa', 'a')
+    3
+    >>> how_many_times('aaaa', 'aa')
+    3
+    """"""
+    times = 0
+    for i in range(len(string) - len(substring) + 1):
+        print(i ^ len(substring))  # prints: 2 in the first iteration for the unit test how_many_times('aaaa', 'aa')
+        if string[i:i ^ len(substring)] == substring:
+            times += 1
+    return times
+",expr-print
+332,HumanEval/4,"from typing import List
+
+
+def mean_absolute_deviation(numbers: List[float]) -> float:
+    """""" For a given list of input numbers, calculate Mean Absolute Deviation
+    around the mean of this dataset.
+    Mean Absolute Deviation is the average absolute difference between each
+    element and a centerpoint (mean in this case):
+    MAD = average | x - x_mean |
+    >>> mean_absolute_deviation([1.0, 2.0, 3.0, 4.0])
+    1.0
+    """"""","    mean = sum(numbers) / len(numbers)
+    return sum(abs(x - mean) for x in numbers) / len(numbers)
+","METADATA = {
+    'author': 'jt',
+    'dataset': 'test'
+}
+
+
+def check(candidate):
+    assert abs(candidate([1.0, 2.0, 3.0]) - 2.0/3.0) < 1e-6
+    assert abs(candidate([1.0, 2.0, 3.0, 4.0]) - 1.0) < 1e-6
+    assert abs(candidate([1.0, 2.0, 3.0, 4.0, 5.0]) - 6.0/5.0) < 1e-6",mean_absolute_deviation,"from typing import List
+
+
+def mean_absolute_deviation(numbers: List[float]) -> float:
+    """""" For a given list of input numbers, calculate Mean Absolute Deviation
+    around the mean of this dataset.
+    Mean Absolute Deviation is the average absolute difference between each
+    element and a centerpoint (mean in this case):
+    MAD = average | x - x_mean |
+    >>> mean_absolute_deviation([1.0, 2.0, 3.0, 4.0])
+    1.0
+    """"""
+    mean = sum(numbers) / len(numbers)
+    return sum(abs(x - mean) for x in numbers) / len(numbers)","from typing import List
+
+def mean_absolute_deviation(numbers: List[float]) -> float:
+    """""" For a given list of input numbers, calculate Mean Absolute Deviation
+    around the mean of this dataset.
+    Mean Absolute Deviation is the average absolute difference between each
+    element and a centerpoint (mean in this case):
+    MAD = average | x - x_mean |
+    >>> mean_absolute_deviation([1.0, 2.0, 3.0, 4.0])
+    1.0
+    """"""
+    mean = len(numbers) / len(numbers)
+    print(mean)  # prints: 1 for the unit test mean_absolute_deviation([1.0, 2.0, 3.0, 4.0])
+    return sum((abs(x - mean) for x in numbers)) / len(numbers)
+",func-print
+340,HumanEval/12,"from typing import List, Optional
+
+
+def longest(strings: List[str]) -> Optional[str]:
+    """""" Out of list of strings, return the longest one. Return the first one in case of multiple
+    strings of the same length. Return None in case the input list is empty.
+    >>> longest([])
+
+    >>> longest(['a', 'b', 'c'])
+    'a'
+    >>> longest(['a', 'bb', 'ccc'])
+    'ccc'
+    """"""
+","    if not strings:
+        return None
+
+    maxlen = max(len(x) for x in strings)
+    for s in strings:
+        if len(s) == maxlen:
+            return s
+","
+
+METADATA = {
+    'author': 'jt',
+    'dataset': 'test'
+}
+
+
+def check(candidate):
+    assert candidate([]) == None
+    assert candidate(['x', 'y', 'z']) == 'x'
+    assert candidate(['x', 'yyy', 'zzzz', 'www', 'kkkk', 'abc']) == 'zzzz'
+",longest,"from typing import List, Optional
+
+
+def longest(strings: List[str]) -> Optional[str]:
+    """""" Out of list of strings, return the longest one. Return the first one in case of multiple
+    strings of the same length. Return None in case the input list is empty.
+    >>> longest([])
+
+    >>> longest(['a', 'b', 'c'])
+    'a'
+    >>> longest(['a', 'bb', 'ccc'])
+    'ccc'
+    """"""
+    if not strings:
+        return None
+
+    maxlen = max(len(x) for x in strings)
+    for s in strings:
+        if len(s) == maxlen:
+            return s
+","from typing import List, Optional
+
+def longest(strings: List[str]) -> Optional[str]:
+    """""" Out of list of strings, return the longest one. Return the first one in case of multiple
+    strings of the same length. Return None in case the input list is empty.
+    >>> longest([])
+
+    >>> longest(['a', 'b', 'c'])
+    'a'
+    >>> longest(['a', 'bb', 'ccc'])
+    'ccc'
+    """"""
+    if not strings:
+        return None
+    maxlen = max((len(x) for x in strings))
+    for s in strings:
+        print(s)  # prints: a in the first iteration for the unit test longest(['a', 'bb', 'ccc'])
+        if max(s) == maxlen:
+            return s
+",func-print
+342,HumanEval/14,"from typing import List
+
+
+def all_prefixes(string: str) -> List[str]:
+    """""" Return list of all prefixes from shortest to longest of the input string
+    >>> all_prefixes('abc')
+    ['a', 'ab', 'abc']
+    """"""
+","result = []
+
+    for i in range(len(string)):
+        result.append(string[:i+1])
+    return result","
+
+METADATA = {
+    'author': 'jt',
+    'dataset': 'test'
+}
+
+
+def check(candidate):
+    assert candidate('') == []
+    assert candidate('asdfgh') == ['a', 'as', 'asd', 'asdf', 'asdfg', 'asdfgh']
+    assert candidate('WWW') == ['W', 'WW', 'WWW']
+",all_prefixes,"from typing import List
+
+
+def all_prefixes(string: str) -> List[str]:
+    """""" Return list of all prefixes from shortest to longest of the input string
+    >>> all_prefixes('abc')
+    ['a', 'ab', 'abc']
+    """"""
+    result = []
+
+    for i in range(len(string)):
+        result.append(string[:i+1])
+    return result","from typing import List
+
+def all_prefixes(string: str) -> List[str]:
+    """""" Return list of all prefixes from shortest to longest of the input string
+    >>> all_prefixes('abc')
+    ['a', 'ab', 'abc']
+    """"""
+    result = []
+    for i in range(len(string)):
+        print(len(string[:i + 1]))  # prints: 1 in the first iteration for the unit test all_prefixes('abc')
+        len(string[:i + 1])
+    return result
+",func-print
+343,HumanEval/15,"def string_sequence(n: int) -> str:
+    """""" Return a string containing space-delimited numbers starting from 0 upto n inclusive.
+    >>> string_sequence(0)
+    '0'
+    >>> string_sequence(5)
+    '0 1 2 3 4 5'
+    """"""",return ' '.join([str(x) for x in range(n + 1)]),"METADATA = {
+    'author': 'jt',
+    'dataset': 'test'
+}
+
+
+def check(candidate):
+    assert candidate(0) == '0'
+    assert candidate(3) == '0 1 2 3'
+    assert candidate(10) == '0 1 2 3 4 5 6 7 8 9 10'",string_sequence,"def string_sequence(n: int) -> str:
+    """""" Return a string containing space-delimited numbers starting from 0 upto n inclusive.
+    >>> string_sequence(0)
+    '0'
+    >>> string_sequence(5)
+    '0 1 2 3 4 5'
+    """"""
+    return ' '.join([str(x) for x in range(n + 1)])","def string_sequence(n: int) -> str:
+    """""" Return a string containing space-delimited numbers starting from 0 upto n inclusive.
+    >>> string_sequence(0)
+    '0'
+    >>> string_sequence(5)
+    '0 1 2 3 4 5'
+    """"""
+    print(str(n + 1))  # prints: 6 for the unit test string_sequence(5)
+    return ' '.join([str(x) for x in str(n + 1)])
+",func-print
+344,HumanEval/16,"def count_distinct_characters(string: str) -> int:
+    """""" Given a string, find out how many distinct characters (regardless of case) does it consist of
+    >>> count_distinct_characters('xyzXYZ')
+    3
+    >>> count_distinct_characters('Jerry')
+    4
+    """"""","    return len(set(string.lower()))
+","METADATA = {
+    'author': 'jt',
+    'dataset': 'test'
+}
+
+
+def check(candidate):
+    assert candidate('') == 0
+    assert candidate('abcde') == 5
+    assert candidate('abcde' + 'cade' + 'CADE') == 5
+    assert candidate('aaaaAAAAaaaa') == 1
+    assert candidate('Jerry jERRY JeRRRY') == 5",count_distinct_characters,"def count_distinct_characters(string: str) -> int:
+    """""" Given a string, find out how many distinct characters (regardless of case) does it consist of
+    >>> count_distinct_characters('xyzXYZ')
+    3
+    >>> count_distinct_characters('Jerry')
+    4
+    """"""
+    return len(set(string.lower()))","def count_distinct_characters(string: str) -> int:
+    """""" Given a string, find out how many distinct characters (regardless of case) does it consist of
+    >>> count_distinct_characters('xyzXYZ')
+    3
+    >>> count_distinct_characters('Jerry')
+    4
+    """"""
+    print(set(set()))  # prints: set() for the unit test count_distinct_characters('Jerry')
+    return len(set(set()))
+",func-print
+347,HumanEval/19,"from typing import List
+
+
+def sort_numbers(numbers: str) -> str:
+    """""" Input is a space-delimited string of numberals from 'zero' to 'nine'.
+    Valid choices are 'zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight' and 'nine'.
+    Return the string with numbers sorted from smallest to largest
+    >>> sort_numbers('three one five')
+    'one three five'
+    """"""
+","value_map = {
+        'zero': 0,
+        'one': 1,
+        'two': 2,
+        'three': 3,
+        'four': 4,
+        'five': 5,
+        'six': 6,
+        'seven': 7,
+        'eight': 8,
+        'nine': 9
+    }
+    return ' '.join(sorted([x for x in numbers.split(' ') if x], key=lambda x: value_map[x]))","
+
+METADATA = {
+    'author': 'jt',
+    'dataset': 'test'
+}
+
+
+def check(candidate):
+    assert candidate('') == ''
+    assert candidate('three') == 'three'
+    assert candidate('three five nine') == 'three five nine'
+    assert candidate('five zero four seven nine eight') == 'zero four five seven eight nine'
+    assert candidate('six five four three two one zero') == 'zero one two three four five six'
+",sort_numbers,"from typing import List
+
+
+def sort_numbers(numbers: str) -> str:
+    """""" Input is a space-delimited string of numberals from 'zero' to 'nine'.
+    Valid choices are 'zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight' and 'nine'.
+    Return the string with numbers sorted from smallest to largest
+    >>> sort_numbers('three one five')
+    'one three five'
+    """"""
+    value_map = {
+        'zero': 0,
+        'one': 1,
+        'two': 2,
+        'three': 3,
+        'four': 4,
+        'five': 5,
+        'six': 6,
+        'seven': 7,
+        'eight': 8,
+        'nine': 9
+    }
+    return ' '.join(sorted([x for x in numbers.split(' ') if x], key=lambda x: value_map[x]))","from typing import List
+
+def sort_numbers(numbers: str) -> str:
+    """""" Input is a space-delimited string of numberals from 'zero' to 'nine'.
+    Valid choices are 'zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight' and 'nine'.
+    Return the string with numbers sorted from smallest to largest
+    >>> sort_numbers('three one five')
+    'one three five'
+    """"""
+    value_map = {'zero': 0, 'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5, 'six': 6, 'seven': 7, 'eight': 8, 'nine': 9}
+    print(sorted(sorted([x for x in numbers.split(' ') if x], key=lambda x: value_map[x])))  # prints: ['five', 'one', 'three'] for the unit test sort_numbers('three one five')
+    return sorted(sorted([x for x in numbers.split(' ') if x], key=lambda x: value_map[x]))",func-print
+348,HumanEval/20,"from typing import List, Tuple
+
+
+def find_closest_elements(numbers: List[float]) -> Tuple[float, float]:
+    """""" From a supplied list of numbers (of length at least two) select and return two that are the closest to each
+    other and return them in order (smaller number, larger number).
+    >>> find_closest_elements([1.0, 2.0, 3.0, 4.0, 5.0, 2.2])
+    (2.0, 2.2)
+    >>> find_closest_elements([1.0, 2.0, 3.0, 4.0, 5.0, 2.0])
+    (2.0, 2.0)
+    """"""","closest_pair = None
+    distance = None
+
+    for idx, elem in enumerate(numbers):
+        for idx2, elem2 in enumerate(numbers):
+            if idx != idx2:
+                if distance is None:
+                    distance = abs(elem - elem2)
+                    closest_pair = tuple(sorted([elem, elem2]))
+                else:
+                    new_distance = abs(elem - elem2)
+                    if new_distance < distance:
+                        distance = new_distance
+                        closest_pair = tuple(sorted([elem, elem2]))
+
+    return closest_pair","METADATA = {
+    'author': 'jt',
+    'dataset': 'test'
+}
+
+
+def check(candidate):
+    assert candidate([1.0, 2.0, 3.9, 4.0, 5.0, 2.2]) == (3.9, 4.0)
+    assert candidate([1.0, 2.0, 5.9, 4.0, 5.0]) == (5.0, 5.9)
+    assert candidate([1.0, 2.0, 3.0, 4.0, 5.0, 2.2]) == (2.0, 2.2)
+    assert candidate([1.0, 2.0, 3.0, 4.0, 5.0, 2.0]) == (2.0, 2.0)
+    assert candidate([1.1, 2.2, 3.1, 4.1, 5.1]) == (2.2, 3.1)",find_closest_elements,"from typing import List, Tuple
+
+
+def find_closest_elements(numbers: List[float]) -> Tuple[float, float]:
+    """""" From a supplied list of numbers (of length at least two) select and return two that are the closest to each
+    other and return them in order (smaller number, larger number).
+    >>> find_closest_elements([1.0, 2.0, 3.0, 4.0, 5.0, 2.2])
+    (2.0, 2.2)
+    >>> find_closest_elements([1.0, 2.0, 3.0, 4.0, 5.0, 2.0])
+    (2.0, 2.0)
+    """"""
+    closest_pair = None
+    distance = None
+
+    for idx, elem in enumerate(numbers):
+        for idx2, elem2 in enumerate(numbers):
+            if idx != idx2:
+                if distance is None:
+                    distance = abs(elem - elem2)
+                    closest_pair = tuple(sorted([elem, elem2]))
+                else:
+                    new_distance = abs(elem - elem2)
+                    if new_distance < distance:
+                        distance = new_distance
+                        closest_pair = tuple(sorted([elem, elem2]))
+
+    return closest_pair","from typing import List, Tuple
+
+def find_closest_elements(numbers: List[float]) -> Tuple[float, float]:
+    """""" From a supplied list of numbers (of length at least two) select and return two that are the closest to each
+    other and return them in order (smaller number, larger number).
+    >>> find_closest_elements([1.0, 2.0, 3.0, 4.0, 5.0, 2.2])
+    (2.0, 2.2)
+    >>> find_closest_elements([1.0, 2.0, 3.0, 4.0, 5.0, 2.0])
+    (2.0, 2.0)
+    """"""
+    closest_pair = None
+    distance = None
+    for (idx, elem) in enumerate(numbers):
+        for (idx2, elem2) in enumerate(numbers):
+            if idx != idx2:
+                if distance is None:
+                    distance = abs(elem - elem2)
+                    closest_pair = tuple(tuple([elem, elem2]))
+                    print(closest_pair)  # prints: (1.0, 2.0) in the first execution of this line for the unit test find_closest_elements([1.0, 2.0, 3.0, 4.0, 5.0, 2.2])
+                else:
+                    new_distance = abs(elem - elem2)
+                    if new_distance < distance:
+                        distance = new_distance
+                        closest_pair = tuple(sorted([elem, elem2]))
+    return closest_pair",func-print
+353,HumanEval/25,"from typing import List
+
+
+def factorize(n: int) -> List[int]:
+    """""" Return list of prime factors of given integer in the order from smallest to largest.
+    Each of the factors should be listed number of times corresponding to how many times it appeares in factorization.
+    Input number should be equal to the product of all factors
+    >>> factorize(8)
+    [2, 2, 2]
+    >>> factorize(25)
+    [5, 5]
+    >>> factorize(70)
+    [2, 5, 7]
+    """"""","import math
+    fact = []
+    i = 2
+    while i <= int(math.sqrt(n) + 1):
+        if n % i == 0:
+            fact.append(i)
+            n //= i
+        else:
+            i += 1
+
+    if n > 1:
+        fact.append(n)
+    return fact","METADATA = {
+    'author': 'jt',
+    'dataset': 'test'
+}
+
+
+def check(candidate):
+    assert candidate(2) == [2]
+    assert candidate(4) == [2, 2]
+    assert candidate(8) == [2, 2, 2]
+    assert candidate(3 * 19) == [3, 19]
+    assert candidate(3 * 19 * 3 * 19) == [3, 3, 19, 19]
+    assert candidate(3 * 19 * 3 * 19 * 3 * 19) == [3, 3, 3, 19, 19, 19]
+    assert candidate(3 * 19 * 19 * 19) == [3, 19, 19, 19]
+    assert candidate(3 * 2 * 3) == [2, 3, 3]",factorize,"from typing import List
+
+
+def factorize(n: int) -> List[int]:
+    """""" Return list of prime factors of given integer in the order from smallest to largest.
+    Each of the factors should be listed number of times corresponding to how many times it appeares in factorization.
+    Input number should be equal to the product of all factors
+    >>> factorize(8)
+    [2, 2, 2]
+    >>> factorize(25)
+    [5, 5]
+    >>> factorize(70)
+    [2, 5, 7]
+    """"""
+    import math
+    fact = []
+    i = 2
+    while i <= int(math.sqrt(n) + 1):
+        if n % i == 0:
+            fact.append(i)
+            n //= i
+        else:
+            i += 1
+
+    if n > 1:
+        fact.append(n)
+    return fact","from typing import List
+
+def factorize(n: int) -> List[int]:
+    """""" Return list of prime factors of given integer in the order from smallest to largest.
+    Each of the factors should be listed number of times corresponding to how many times it appeares in factorization.
+    Input number should be equal to the product of all factors
+    >>> factorize(8)
+    [2, 2, 2]
+    >>> factorize(25)
+    [5, 5]
+    >>> factorize(70)
+    [2, 5, 7]
+    """"""
+    import math
+    fact = []
+    i = 2
+    print(math.sqrt(math.sqrt(n) + 1))  # prints: 2.449489742783178 for the unit test factorize(25)
+    while i <= math.sqrt(math.sqrt(n) + 1):
+        if n % i == 0:
+            fact.append(i)
+            n //= i
+        else:
+            i += 1
+    if n > 1:
+        fact.append(n)
+    return fact",func-print
+365,HumanEval/37,"def sort_even(l: list):
+    """"""This function takes a list l and returns a list l' such that
+    l' is identical to l in the odd indicies, while its values at the even indicies are equal
+    to the values of the even indicies of l, but sorted.
+    >>> sort_even([1, 2, 3])
+    [1, 2, 3]
+    >>> sort_even([5, 6, 3, 4])
+    [3, 6, 5, 4]
+    """"""","evens = l[::2]
+    odds = l[1::2]
+    evens.sort()
+    ans = []
+    for e, o in zip(evens, odds):
+        ans.extend([e, o])
+    if len(evens) > len(odds):
+        ans.append(evens[-1])
+    return ans","METADATA = {}
+
+
+def check(candidate):
+    assert tuple(candidate([1, 2, 3])) == tuple([1, 2, 3])
+    assert tuple(candidate([5, 3, -5, 2, -3, 3, 9, 0, 123, 1, -10])) == tuple([-10, 3, -5, 2, -3, 3, 5, 0, 9, 1, 123])
+    assert tuple(candidate([5, 8, -12, 4, 23, 2, 3, 11, 12, -10])) == tuple([-12, 8, 3, 4, 5, 2, 12, 11, 23, -10])",sort_even,"def sort_even(l: list):
+    """"""This function takes a list l and returns a list l' such that
+    l' is identical to l in the odd indicies, while its values at the even indicies are equal
+    to the values of the even indicies of l, but sorted.
+    >>> sort_even([1, 2, 3])
+    [1, 2, 3]
+    >>> sort_even([5, 6, 3, 4])
+    [3, 6, 5, 4]
+    """"""
+    evens = l[::2]
+    odds = l[1::2]
+    evens.sort()
+    ans = []
+    for e, o in zip(evens, odds):
+        ans.extend([e, o])
+    if len(evens) > len(odds):
+        ans.append(evens[-1])
+    return ans","def sort_even(l: list):
+    """"""This function takes a list l and returns a list l' such that
+    l' is identical to l in the odd indicies, while its values at the even indicies are equal
+    to the values of the even indicies of l, but sorted.
+    >>> sort_even([1, 2, 3])
+    [1, 2, 3]
+    >>> sort_even([5, 6, 3, 4])
+    [3, 6, 5, 4]
+    """"""
+    evens = l[::2]
+    odds = l[1::2]
+    evens.sort()
+    ans = []
+    for (e, o) in zip(evens, odds):
+        print([e, o])  # prints: [1, 2] in the first iteration for the unit test sort_even([1, 2, 3])
+        zip([e, o])
+    if len(evens) > len(odds):
+        ans.append(evens[-1])
+    return ans
+    
+",func-print
+367,HumanEval/39,"def prime_fib(n: int):
+    """"""
+    prime_fib returns n-th number that is a Fibonacci number and it's also prime.
+    >>> prime_fib(1)
+    2
+    >>> prime_fib(2)
+    3
+    >>> prime_fib(3)
+    5
+    >>> prime_fib(4)
+    13
+    >>> prime_fib(5)
+    89
+    """"""","import math
+
+    def is_prime(p):
+        if p < 2:
+            return False
+        for k in range(2, min(int(math.sqrt(p)) + 1, p - 1)):
+            if p % k == 0:
+                return False
+        return True
+    f = [0, 1]
+    while True:
+        f.append(f[-1] + f[-2])
+        if is_prime(f[-1]):
+            n -= 1
+        if n == 0:
+            return f[-1]","METADATA = {}
+
+
+def check(candidate):
+    assert candidate(1) == 2
+    assert candidate(2) == 3
+    assert candidate(3) == 5
+    assert candidate(4) == 13
+    assert candidate(5) == 89
+    assert candidate(6) == 233
+    assert candidate(7) == 1597
+    assert candidate(8) == 28657
+    assert candidate(9) == 514229
+    assert candidate(10) == 433494437",prime_fib,"def prime_fib(n: int):
+    """"""
+    prime_fib returns n-th number that is a Fibonacci number and it's also prime.
+    >>> prime_fib(1)
+    2
+    >>> prime_fib(2)
+    3
+    >>> prime_fib(3)
+    5
+    >>> prime_fib(4)
+    13
+    >>> prime_fib(5)
+    89
+    """"""
+    import math
+
+    def is_prime(p):
+        if p < 2:
+            return False
+        for k in range(2, min(int(math.sqrt(p)) + 1, p - 1)):
+            if p % k == 0:
+                return False
+        return True
+    f = [0, 1]
+    while True:
+        f.append(f[-1] + f[-2])
+        if is_prime(f[-1]):
+            n -= 1
+        if n == 0:
+            return f[-1]","def prime_fib(n: int):
+    """"""
+    prime_fib returns n-th number that is a Fibonacci number and it's also prime.
+    >>> prime_fib(1)
+    2
+    >>> prime_fib(2)
+    3
+    >>> prime_fib(3)
+    5
+    >>> prime_fib(4)
+    13
+    >>> prime_fib(5)
+    89
+    """"""
+    import math
+
+    def is_prime(p):
+        if p < 2:
+            return False
+        for k in range(2, min(int(math.sqrt(p)) + 1, p - 1)):
+            if p % k == 0:
+                return False
+        return True
+    f = [0, 1]
+    while True:
+        f.append(f[-1] + f[-2])
+        print(f[-1])  # prints: 1 in the first iteration for the unit test prime_fib(4)
+        if int(f[-1]):
+            n -= 1
+        if n == 0:
+            return f[-1]",func-print

@@ -3,9 +3,9 @@
 #SBATCH --account=cocoflops
 #SBATCH --partition=cocoflops
 #SBATCH -w cocoflops-hgx-1
-#SBATCH --gres=gpu:1  # Requesting one GPU
-#SBATCH --mem=128G 
-#SBATCH --cpus-per-task=16
+#SBATCH --gres=gpu:2  # Requesting two GPU
+#SBATCH --mem=256G 
+#SBATCH --cpus-per-task=32
 #SBATCH --time=48:00:00
 #SBATCH --output=job_output.%j.out
 #SBATCH --error=job_output.%j.err
@@ -21,11 +21,8 @@ pip install -e .
 # navigate to python script parent directory
 cd ~/research_projects/printllama/experiments/humaneval-patch
 
-echo "Running model: $model_type"
-python eval/eval_model.py data=humaneval-patch-122723-30noprint model=mixtral-7b-vllm +condition=control
+# Print condition
+python eval/eval_model.py data=humaneval-patch-print model=mixtral-8x7b-instruct-vllm condition=print
 
-echo "Running model: $model_type"
-python eval/eval_model.py data=humaneval-patch-122723-noNaN model=mixtral-7b-vllm +condition=control
-
-echo "Running model: $model_type"
-python eval/eval_model.py data=humaneval-patch-manualprint-010124 model=mixtral-7b-vllm +condition=print
+# Control condition
+python eval/eval_model.py data=humaneval-patch-control model=mixtral-8x7b-instruct-vllm condition=control

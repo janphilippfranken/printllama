@@ -1,4 +1,5 @@
 import signal
+import sys, os
 
 PROMPT_FORMAT = """Correct the following solution:
 ```python
@@ -17,3 +18,11 @@ EXPERTISE = "You are an expert computer science researcher and programmer, espec
 
 def signal_handler(signum, frame):
     raise Exception("Timed out!")
+
+# Disable
+def blockPrint():
+    sys.stdout = open(os.devnull, 'w')
+
+# Restore
+def enablePrint():
+    sys.stdout = sys.__stdout__

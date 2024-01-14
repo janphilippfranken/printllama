@@ -5,6 +5,7 @@ import fire
 import pandas as pd
 import logging
 import random
+from datasets import load_dataset
 
 
 from utils import Perturber
@@ -110,7 +111,8 @@ def main(args: DictConfig) -> None:
     
     
     out = pd.concat([var_long, expr_long, func_long])
-    out.to_csv('../data/humaneval-patch-122723.csv')
+    out = out[out['bug'].notnull()]
+    out.to_csv('/sailhome/andukuri/research_projects/printllama/experiments/humaneval-patch/data/humaneval-patch-ast.csv', index=False)
     
 
 if __name__ == '__main__':

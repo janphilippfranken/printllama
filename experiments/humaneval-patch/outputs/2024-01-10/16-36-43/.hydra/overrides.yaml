@@ -1,0 +1,3 @@
+- data=humaneval-patch-manualprint-010124
+- model=mixtral-7b-vllm
+- condition=print

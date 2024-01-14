@@ -1,0 +1,3 @@
+- model=mixtral-8x7b-instruct-vllm
+- data=humaneval-patch-011224-temp07-gpt4prints-exploded
+- condition=print

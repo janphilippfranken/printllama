@@ -1,0 +1,3 @@
+- model=mixtral-7b-vllm
+- data=humaneval-patch-011024-gpt4prints
+- condition=print

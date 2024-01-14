@@ -24,23 +24,20 @@ cd ~/research_projects/printllama/experiments/humaneval-patch
 # Array of model types
 model_types=("huggingfaceh4-zephyr-7b-beta-hf" "mistral-7b-instruct-v02-hf")
 
-# Loop through model types for full control set
-for model_type in "${model_types[@]}"
-do
-    echo "Running model: $model_type"
-    torchrun --nproc_per_node 1 --master_port 0 eval/eval_model.py data=humaneval-patch-122723-noNaN model=$model_type condition=control
-done
-
-# Loop through model types for filtered control set
-for model_type in "${model_types[@]}"
-do
-    echo "Running model: $model_type"
-    torchrun --nproc_per_node 1 --master_port 0 eval/eval_model.py data=humaneval-patch-122723-30noprint model=$model_type condition=control
-done
-
 # Loop through model types for print set
 for model_type in "${model_types[@]}"
 do
     echo "Running model: $model_type"
-    torchrun --nproc_per_node 1 --master_port 0 eval/eval_model.py data=humaneval-patch-manualprint-010124 model=$model_type condition=print
+    torchrun --nproc_per_node 1 --master_port 0 eval/eval_model.py data=humaneval-patch-print model=$model_type condition=print
 done
+
+python eval/eval_model.py 
+
+# Loop through model types for full control set
+for model_type in "${model_types[@]}"
+do
+    echo "Running model: $model_type"
+    torchrun --nproc_per_node 1 --master_port 0 eval/eval_model.py data=humaneval-patch-control model=$model_type condition=control
+done
+
+
