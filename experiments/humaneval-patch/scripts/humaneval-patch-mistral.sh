@@ -25,4 +25,4 @@ cd ~/research_projects/printllama/experiments/humaneval-patch
 torchrun --nproc_per_node 1 --master_port 0 eval/eval_model.py data=humaneval-patch-print model=mistral-7b-instruct-v02-hf condition=print
 
 # Control condition
-#torchrun --nproc_per_node 1 --master_port 0 eval/eval_model.py data=humaneval-patch-control model=mistral-7b-instruct-v02-hf condition=control
+torchrun --nproc_per_node 1 --master_port 0 eval/eval_model.py data=humaneval-patch-control model=mistral-7b-instruct-v02-hf condition=control

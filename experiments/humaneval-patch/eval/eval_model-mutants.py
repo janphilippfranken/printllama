@@ -16,7 +16,7 @@ import signal
 from collections import defaultdict
 from datasets import load_dataset, Dataset
 
-from utils import PROMPT_FORMAT, EXPERTISE, signal_handler, blockPrint, enablePrint
+from utils import MUTANTS_PROMPT_FORMAT, EXPERTISE, signal_handler
 from printllama.helpers import extract_code
 
 
@@ -90,11 +90,11 @@ def main(args: DictConfig) -> None:
                     json.dump(accs, f)
                 with open(f'completions/{args.data.path[5:-4]}/{args.model.name}/seed{seed}.json', 'w') as f:
                     json.dump(samples, f)
-            print(f"Task {row['task_id']}")
+            print(f"Task {row['name']}")
             task_start = time.time()
             
             
-            message = PROMPT_FORMAT.format(row['bug'], row['test'], row['entry_point'])
+            message = MUTANTS_PROMPT_FORMAT.format(row['bug'], row['test'])
             if is_openai:
                 print(f"Began batch prompting...")
                 completions = model.batch_prompt(
@@ -124,7 +124,6 @@ def main(args: DictConfig) -> None:
             samples.append(completions)
             
             
-            exec(row['test'], globals())
             passed = list()
             for j, completion in enumerate(completions):
                 signal.signal(signal.SIGALRM, signal_handler)
@@ -132,9 +131,7 @@ def main(args: DictConfig) -> None:
                 
                 try:
                     exec(completion, globals())
-                    blockPrint()
                     exec(row['test'], globals())
-                    enablePrint()
                     passed.append(True)
                 except:
                     passed.append(False)

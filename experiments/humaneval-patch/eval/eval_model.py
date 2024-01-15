@@ -16,7 +16,7 @@ import signal
 from collections import defaultdict
 from datasets import load_dataset, Dataset
 
-from utils import PROMPT_FORMAT, EXPERTISE, signal_handler, blockPrint, enablePrint
+from utils import PROMPT_FORMAT, EXPERTISE, signal_handler, Timeout, SuppressPrint
 from printllama.helpers import extract_code
 
 
@@ -118,13 +118,11 @@ def main(args: DictConfig) -> None:
                     completions = [extract_code(completion) for completion in model.batch_prompt([f'<s>{B_INST}{B_SYS}{EXPERTISE}{E_SYS}{message}{E_INST}'], **args.model.run.completion_config)]
             samples.append(completions)
             
-            
             exec(row['test'], globals())
             passed = list()
             for j, completion in enumerate(completions):
                 signal.signal(signal.SIGALRM, signal_handler)
                 signal.alarm(1)   # One seconds
-                
                 try:
                     exec(completion, globals())
                     check(globals()[row['entry_point']])

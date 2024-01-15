@@ -38,6 +38,7 @@ def generate_prints(args):
     is_meta = "meta" in args.model.model_type.lower()
     is_hf = "hf" in args.model.model_type.lower()
     is_openai = "openai" in args.model.model_type.lower()
+    is_vllm = "vllm" in args.model.model_type.lower()
     
     if not (is_openai):
             print(f"Model type {args.model.model_type} not yet supported.")
@@ -47,6 +48,8 @@ def generate_prints(args):
         args.model.model_config.azure_api.api_key = os.getenv("OPENAI_API_KEY")
         llm = AsyncAzureChatLLM(**args.model.model_config.azure_api)
         model = GPT4Agent(llm=llm, **args.model.run.completion_config)
+    elif is_vllm:
+            model = VLLMInferenceModel(**args.model.model_config)
 
     # Load humaneval-patch dataset
     df = pd.read_csv(PATCH_DIR)
@@ -78,7 +81,7 @@ def generate_prints(args):
     insertions = list()
     for prompt_chunk in chunker(prompts, args.model.run.batch_size):
         # TODO: Add hf, meta, and vllm functionality here
-        if not (is_openai):
+        if not (is_openai or is_vllm):
             print(f"Model type {args.model.model_type} not yet supported.")
             return []
         
@@ -88,6 +91,14 @@ def generate_prints(args):
                     messages=prompt_chunk,
             )
             extracted_completions = [[extract_code(insertion) for insertion in insertion_attempts] for insertion_attempts in completions]
+        elif is_vllm:
+            if 'mixtral' in args.model.name.lower():
+                # MISTRAL INST SPECIAL TOKENS
+                B_INST, E_INST = "[INST]", "[/INST]"
+                B_SYS, E_SYS = "<<SYS>>\n", "\n<</SYS>>\n\n"
+                
+                completions = model.batch_prompt([f'<s>{B_INST}{B_SYS}{EXPERTISE}{E_SYS}{message}{E_INST}'], **args.model.run.completion_config)
+                extracted_completions = []
         insertions.extend(extracted_completions)
     
     

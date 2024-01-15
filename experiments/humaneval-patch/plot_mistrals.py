@@ -13,23 +13,31 @@ def load_data(file_path):
         return []
 
 # File paths
+# file_paths = [
+#     "metrics/humaneval-patch-control/mistral-7b-instruct-v02-hf/seed1.json",
+#     "metrics/humaneval-patch-control/huggingfaceh4-zephyr-7b-beta-hf/seed1.json",
+#     "metrics/humaneval-patch-control/mixtral_7b_instruct/seed1.json",
+#     "metrics/humaneval-patch-print/mistral-7b-instruct-v02-hf/seed1.json",
+#     "metrics/humaneval-patch-print/huggingfaceh4-zephyr-7b-beta-hf/seed1.json",
+#     "metrics/humaneval-patch-print/mixtral_7b_instruct/seed1.json",
+#     "metrics/humaneval-py-mutants/mistral-7b-instruct-v02-hf/seed1.json",
+#     "metrics/humaneval-py-mutants/huggingfaceh4-zephyr-7b-beta-hf/seed1.json",
+#     "metrics/humaneval-py-mutants/mixtral_7b_instruct/seed1.json",
+# ]
+
 file_paths = [
     "metrics/humaneval-patch-control/mistral-7b-instruct-v02-hf/seed1.json",
-    "metrics/humaneval-patch-control/huggingfaceh4-zephyr-7b-beta-hf/seed1.json",
     "metrics/humaneval-patch-control/mixtral_7b_instruct/seed1.json",
     "metrics/humaneval-patch-print/mistral-7b-instruct-v02-hf/seed1.json",
-    "metrics/humaneval-patch-print/huggingfaceh4-zephyr-7b-beta-hf/seed1.json",
     "metrics/humaneval-patch-print/mixtral_7b_instruct/seed1.json",
     "metrics/humaneval-py-mutants/mistral-7b-instruct-v02-hf/seed1.json",
-    "metrics/humaneval-py-mutants/huggingfaceh4-zephyr-7b-beta-hf/seed1.json",
     "metrics/humaneval-py-mutants/mixtral_7b_instruct/seed1.json",
 ]
 
 
 # Loading data
 datasets = [load_data(path) for path in file_paths]
-datasets = [list() for i in range(9)]
-
+breakpoint()
 
 
 # Setting the theme and fon
@@ -46,27 +54,24 @@ std_errs = [1.95 * (np.std(dataset) / np.sqrt(len(dataset))) for dataset in data
 print(len(means))
 print(len(std_errs))
 # Dataset names
-dataset_names = ['patch-control (N = 316)', 'patch-print (N = 316)', 'py-mutants (N = 600)']
+dataset_names = ['humaneval-patch-control (N = 316)', 'humaneval-patch-print (N = 316)', 'humaneval-py-mutants (N = 600)']
 
 
 # Plotting
-fig, ax = plt.subplots(figsize=(10, 5))
+fig, ax = plt.subplots(figsize=(7, 5))
 bar_width = 0.15
 opacity = 0.8
 
 # Bar positions
 bar_pos_mistral = np.arange(len(dataset_names))
-bar_pos_zephyr = [x + bar_width for x in bar_pos_mistral]
-bar_pos_gpt = [x + 2 * bar_width for x in bar_pos_mistral]
+bar_pos_mixtral = [x + bar_width for x in bar_pos_mistral]
 
 # Bars for Mistral
-ax.bar(bar_pos_mistral, means[0::3], bar_width, alpha=opacity, color=colors[0], yerr=std_errs[0::3], label='mistral-7b-instruct')
+ax.bar(bar_pos_mistral, means[0::2], bar_width, alpha=opacity, color=colors[0], yerr=std_errs[0::2], label='mistral-7b-instruct')
 
-# Bars for Zephyr
-ax.bar(bar_pos_zephyr, means[1::3], bar_width, alpha=opacity, color=colors[1], yerr=std_errs[1::3], label='zephyr-7b-beta')
+# Bars for mixtral
+ax.bar(bar_pos_mixtral, means[1::2], bar_width, alpha=opacity, color=colors[1], yerr=std_errs[1::2], label='mixtral-8x7b-instruct')
 
-
-ax.bar(bar_pos_gpt, means[2::3], bar_width, alpha=opacity, color=colors[2], yerr=std_errs[2::3], label='mixtral-8x7b-instruct')
 
 
 # Labels, Title and Custom x-axis
@@ -79,5 +84,5 @@ ax.legend()
 
 # Show plot
 plt.tight_layout()
-plt.savefig('TESTINGTESTING123.pdf')
-plt.savefig('TESTINGTESTING123.png')
+plt.savefig('mistral-and-mixtral.pdf')
+plt.savefig('mistral-and-mixtral.png')
