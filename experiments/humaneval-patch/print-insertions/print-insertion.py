@@ -108,8 +108,8 @@ def generate_prints(args):
     print_df['bug'] = insertions
     print_df_exploded = print_df.explode('bug')
     
-    print_df.to_csv('/sailhome/andukuri/research_projects/printllama/experiments/humaneval-patch/data/humaneval-patch-011224-temp07-gpt4prints.csv')
-    print_df_exploded.to_csv('/sailhome/andukuri/research_projects/printllama/experiments/humaneval-patch/data/humaneval-patch-011224-temp07-gpt4prints-exploded.csv')
+    print_df.to_csv('/sailhome/andukuri/research_projects/printllama/experiments/humaneval-patch/data/humaneval-patch-011224-temp07-mixtralprints.csv')
+    print_df_exploded.to_csv('/sailhome/andukuri/research_projects/printllama/experiments/humaneval-patch/data/humaneval-patch-011224-temp07-mixtralprints-exploded.csv')
     
     
     

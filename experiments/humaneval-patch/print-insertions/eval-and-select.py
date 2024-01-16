@@ -92,9 +92,9 @@ def main(args: DictConfig) -> None:
                     print(f"Began batch prompting...")
                     completions = model.batch_prompt(
                         system_message=EXPERTISE, 
-                        messages=[message] * args.model.run.batch_size,
+                        messages=[message],
                     )
-                    completions = [extract_code(completion) for completion in completions]
+                    completions = [extract_code(completion) for completion in completions[0]]
                 elif is_hf:
                     print(f"Began batch prompting...")
                     if 'mistral' in args.model.name.lower():
@@ -152,7 +152,7 @@ def main(args: DictConfig) -> None:
     with open(f'print-insertions/completions/{args.data.path[5:-4]}/{args.model.name}/seed{seed}.json', 'w') as f:
         json.dump(samples, f)
     
-    print(f"==== Finished testing perturbations from {args.data.path[5:-4]} for {args.model.name} ====")
+    print(f"==== Finished selecting best prints from {args.data.path[5:-4]} for {args.model.name} ====")
 
 
 if __name__ == '__main__':

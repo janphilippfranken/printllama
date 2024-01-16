@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+from textwrap import wrap
 
 def load_data(file_path):
     try:
@@ -12,54 +13,43 @@ def load_data(file_path):
         print(f"File not found: {file_path}")
         return []
 
-# File paths
-# file_paths = [
-#     "metrics/humaneval-patch-control/mistral-7b-instruct-v02-hf/seed1.json",
-#     "metrics/humaneval-patch-control/huggingfaceh4-zephyr-7b-beta-hf/seed1.json",
-#     "metrics/humaneval-patch-control/mixtral_7b_instruct/seed1.json",
-#     "metrics/humaneval-patch-print/mistral-7b-instruct-v02-hf/seed1.json",
-#     "metrics/humaneval-patch-print/huggingfaceh4-zephyr-7b-beta-hf/seed1.json",
-#     "metrics/humaneval-patch-print/mixtral_7b_instruct/seed1.json",
-#     "metrics/humaneval-py-mutants/mistral-7b-instruct-v02-hf/seed1.json",
-#     "metrics/humaneval-py-mutants/huggingfaceh4-zephyr-7b-beta-hf/seed1.json",
-#     "metrics/humaneval-py-mutants/mixtral_7b_instruct/seed1.json",
-# ]
 
 file_paths = [
+    "metrics/humaneval-py-mutants/mistral-7b-instruct-v02-hf/seed1.json",
+    "metrics/humaneval-py-mutants/mixtral_7b_instruct/seed1.json",
     "metrics/humaneval-patch-control/mistral-7b-instruct-v02-hf/seed1.json",
     "metrics/humaneval-patch-control/mixtral_7b_instruct/seed1.json",
     "metrics/humaneval-patch-print/mistral-7b-instruct-v02-hf/seed1.json",
     "metrics/humaneval-patch-print/mixtral_7b_instruct/seed1.json",
-    "metrics/humaneval-py-mutants/mistral-7b-instruct-v02-hf/seed1.json",
-    "metrics/humaneval-py-mutants/mixtral_7b_instruct/seed1.json",
+    "metrics/humaneval-patch-011224-temp07-gpt4prints-exploded-selected-prints-gpt4/mistral-7b-instruct-v02-hf/seed1.json",
+    "metrics/humaneval-patch-011224-temp07-gpt4prints-exploded-selected-prints-gpt4/mixtral_7b_instruct/seed1.json"
 ]
 
 
 # Loading data
 datasets = [load_data(path) for path in file_paths]
-breakpoint()
-
 
 # Setting the theme and fon
 sns.set_theme(style="darkgrid")
 plt.rcParams['font.family'] = 'Avenir'
-plt.figure(figsize=(10, 5))
+plt.figure(figsize=(5, 5))
 colors = sns.palettes.color_palette("colorblind", 10)
 
 # Calculate means and standard errors using list comprehensions
 means = [np.mean(dataset) for dataset in datasets]
 std_errs = [1.95 * (np.std(dataset) / np.sqrt(len(dataset))) for dataset in datasets]
+print(file_paths)
+print(means)
+print(std_errs)
 
 
-print(len(means))
-print(len(std_errs))
 # Dataset names
-dataset_names = ['humaneval-patch-control (N = 316)', 'humaneval-patch-print (N = 316)', 'humaneval-py-mutants (N = 600)']
-
+dataset_names = [ 'humaneval-py-mutants (N = 600)', 'humaneval-patch-control (N = 316)', 'humaneval-patch-print-\nmixtralselect (N = 316)', 'humaneval-patch-print-\ngpt4select (N = 316)']
+dataset_names = ['\n'.join(name.split(' ', 1)) for name in dataset_names]
 
 # Plotting
-fig, ax = plt.subplots(figsize=(7, 5))
-bar_width = 0.15
+fig, ax = plt.subplots(figsize=(12, 5))
+bar_width = 0.35
 opacity = 0.8
 
 # Bar positions
@@ -77,12 +67,14 @@ ax.bar(bar_pos_mixtral, means[1::2], bar_width, alpha=opacity, color=colors[1], 
 # Labels, Title and Custom x-axis
 ax.set_xlabel('Dataset')
 ax.set_ylabel('Accuracy')
-ax.set_title('HumanEvals Accuracy by Dataset and Model')
+ax.set_title('humaneval-patch Accuracies by Dataset and Model')
 ax.set_xticks([r + bar_width / 2 for r in range(len(dataset_names))])
 ax.set_xticklabels(dataset_names)
+
 ax.legend()
+plt.ylim([0.0, 1.0])
 
 # Show plot
 plt.tight_layout()
-plt.savefig('mistral-and-mixtral.pdf')
-plt.savefig('mistral-and-mixtral.png')
+plt.savefig('figures/mistral-and-mixtral-bothselections.pdf')
+plt.savefig('figures/mistral-and-mixtral-bothselections.png')

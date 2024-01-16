@@ -91,5 +91,5 @@ ax.legend()
 
 # Show plot
 plt.tight_layout()
-plt.savefig('TESTINGplot_metrics.pdf')
-plt.savefig('TESTINGplot_metrics.png')
+plt.savefig('figures/TESTINGplot_metrics.pdf')
+plt.savefig('figures/TESTINGplot_metrics.png')
