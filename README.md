@@ -6,6 +6,7 @@ In this repository, we investigate language models' ability to utilize print sta
 3. Evaluate language models' repair accuracy on both the control- (no print) and print- conditions of the data.
 
 To reproduce the following figure:
+- Create an empty conda environment and run ```pip install -e .``` in the ```printllama``` root directory to complete the required setup
 - Produce buggy solutions using ```python experiments/humaneval-patch/ast/produce_perturbations.py```
 - Generate many print insertions per problem using ```python experiments/humaneval-patch/print-insertions/print-insertion.py model=gpt4```
 - Let both GPT-4 and Mixtral choose which prints are most useful per problem using:
