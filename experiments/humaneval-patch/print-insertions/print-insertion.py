@@ -18,6 +18,7 @@ from langchain.schema import (
 from printllama.helpers import extract_code
 from printllama.models.openai.azure import AsyncAzureChatLLM
 from printllama.models.openai.gpt4 import GPT4Agent
+from printllama.models.vllm_models.inference_model import VLLMInferenceModel
 
 from utils import REPAIR_PROMPT_FORMAT, PRINT_SYSTEM_MESSAGE, EXPERT_DIR, PATCH_DIR
 
@@ -41,30 +42,27 @@ def generate_prints(args):
     is_vllm = "vllm" in args.model.model_type.lower()
     
     if not (is_openai):
-            print(f"Model type {args.model.model_type} not yet supported.")
-            return []
+        print(f"Model type {args.model.model_type} not yet supported.")
+        return []
         
     if is_openai:
         args.model.model_config.azure_api.api_key = os.getenv("OPENAI_API_KEY")
         llm = AsyncAzureChatLLM(**args.model.model_config.azure_api)
         model = GPT4Agent(llm=llm, **args.model.run.completion_config)
-    elif is_vllm:
-            model = VLLMInferenceModel(**args.model.model_config)
 
     # Load humaneval-patch dataset
     df = pd.read_csv(PATCH_DIR)
     
     # Load expert prints from manual print dataset
     expert_df = pd.read_csv(EXPERT_DIR)
-    
+
     # get few-shot bugs and corresponding expert prints
-    bugs = df[expert_df['bugtype'].str.endswith('print')]['bug'].tolist()
+    bugs = df.iloc[expert_df['Unnamed: 0']]['bug'].tolist()
     expert_prints = expert_df[expert_df['bugtype'].str.endswith('print')]['bug'].tolist()
     
-    # keep only first 30 rows for test run
+    # drop NaNs
     df = df[df['bug'].notnull()]
-    
-    
+   
    
     prompts = list()
     # Loop over all problems and generate few-shot prompts
@@ -91,14 +89,6 @@ def generate_prints(args):
                     messages=prompt_chunk,
             )
             extracted_completions = [[extract_code(insertion) for insertion in insertion_attempts] for insertion_attempts in completions]
-        elif is_vllm:
-            if 'mixtral' in args.model.name.lower():
-                # MISTRAL INST SPECIAL TOKENS
-                B_INST, E_INST = "[INST]", "[/INST]"
-                B_SYS, E_SYS = "<<SYS>>\n", "\n<</SYS>>\n\n"
-                
-                completions = model.batch_prompt([f'<s>{B_INST}{B_SYS}{EXPERTISE}{E_SYS}{message}{E_INST}'], **args.model.run.completion_config)
-                extracted_completions = []
         insertions.extend(extracted_completions)
     
     
@@ -108,8 +98,8 @@ def generate_prints(args):
     print_df['bug'] = insertions
     print_df_exploded = print_df.explode('bug')
     
-    print_df.to_csv('/sailhome/andukuri/research_projects/printllama/experiments/humaneval-patch/data/humaneval-patch-011224-temp07-mixtralprints.csv')
-    print_df_exploded.to_csv('/sailhome/andukuri/research_projects/printllama/experiments/humaneval-patch/data/humaneval-patch-011224-temp07-mixtralprints-exploded.csv')
+    print_df.to_csv(f'/sailhome/andukuri/research_projects/printllama/experiments/humaneval-patch/data/humaneval-patch-{args.model.name.lower()}-prints.csv')
+    print_df_exploded.to_csv(f'/sailhome/andukuri/research_projects/printllama/experiments/humaneval-patch/data/humaneval-patch-{args.model.name.lower()}-prints-exploded.csv')
     
     
     

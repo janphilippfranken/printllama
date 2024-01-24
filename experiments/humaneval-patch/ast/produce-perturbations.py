@@ -111,8 +111,9 @@ def main(args: DictConfig) -> None:
     
     
     out = pd.concat([var_long, expr_long, func_long])
+    out.to_csv('/sailhome/andukuri/research_projects/printllama/experiments/humaneval-patch/data/humaneval-patch-control-withNaN.csv', index=False)
     out = out[out['bug'].notnull()]
-    out.to_csv('/sailhome/andukuri/research_projects/printllama/experiments/humaneval-patch/data/humaneval-patch-ast.csv', index=False)
+    out.to_csv('/sailhome/andukuri/research_projects/printllama/experiments/humaneval-patch/data/humaneval-patch-control.csv', index=False)
     
 
 if __name__ == '__main__':

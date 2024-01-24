@@ -14,8 +14,8 @@ Your output should contain only the corrected code, without explanation or comme
 
 PRINT_SYSTEM_MESSAGE = """You are an expert computer scientist at programmer, skilled at inserting useful print statements into incorrect code chunks in order to help a user later debug their incorrect solution. Crucially, you do not actually fix the code - you simply insert a useful print to help the user identify and fix the error."""
 
-PATCH_DIR = 'data/humaneval-patch-122723.csv'
-EXPERT_DIR = 'data/humaneval-patch-manualprint-010124.csv'
+PATCH_DIR = 'data/humaneval-patch-control-withNaN.csv'
+EXPERT_DIR = 'data/humaneval-patch-manualprint.csv'
 
 PROMPT_FORMAT = """Correct the following solution:
 ```python

@@ -3,10 +3,10 @@
 #SBATCH --account=cocoflops
 #SBATCH --partition=cocoflops
 #SBATCH -w cocoflops-hgx-1
-#SBATCH --gres=gpu:1  # Requesting one GPU
-#SBATCH --mem=64G 
-#SBATCH --cpus-per-task=16
-#SBATCH --time=48:00:00
+#SBATCH --gres=gpu:2  # Requesting one GPU
+#SBATCH --mem=256G 
+#SBATCH --cpus-per-task=32
+#SBATCH --time=96:00:00
 #SBATCH --output=job_output.%j.out
 #SBATCH --error=job_output.%j.err
 
@@ -21,23 +21,18 @@ pip install -e .
 # navigate to python script parent directory
 cd ~/research_projects/printllama/experiments/humaneval-patch
 
-# Array of model types
-model_types=("huggingfaceh4-zephyr-7b-beta-hf" "mistral-7b-instruct-v02-hf")
+torchrun --nproc_per_node 1 experiments/humaneval-patch/eval/eval_model.py model=mistral-7b-instruct-v02-hf data=humaneval-py-mutants
 
-# Loop through model types for print set
-for model_type in "${model_types[@]}"
-do
-    echo "Running model: $model_type"
-    torchrun --nproc_per_node 1 --master_port 0 eval/eval_model.py data=humaneval-patch-print model=$model_type condition=print
-done
+torchrun --nproc_per_node 2 experiments/humaneval-patch/eval/eval_model.py model=mixtral-8x7b-instruct-vllm data=humaneval-py-mutants
 
-python eval/eval_model.py 
+torchrun --nproc_per_node 1 experiments/humaneval-patch/eval/eval_model.py model=mistral-7b-instruct-v02-hf data=humaneval-patch-control condition=control
 
-# Loop through model types for full control set
-for model_type in "${model_types[@]}"
-do
-    echo "Running model: $model_type"
-    torchrun --nproc_per_node 1 --master_port 0 eval/eval_model.py data=humaneval-patch-control model=$model_type condition=control
-done
+torchrun --nproc_per_node 2 experiments/humaneval-patch/eval/eval_model.py model=mixtral-8x7b-instruct-vllm data=humaneval-patch-control condition=control
 
+torchrun --nproc_per_node 1 experiments/humaneval-patch/eval/eval_model.py model=mistral-7b-instruct-v02-hf data=humaneval-patch-gpt4-prints-exploded-selected-prints-gpt4 condition=print
 
+torchrun --nproc_per_node 2 experiments/humaneval-patch/eval/eval_model.py model=mixtral-8x7b-instruct-vllm data=humaneval-patch-gpt4-prints-exploded-selected-prints-gpt4 condition=print
+
+torchrun --nproc_per_node 1 experiments/humaneval-patch/eval/eval_model.py model=mistral-7b-instruct-v02-hf data=humaneval-patch-gpt4-prints-exploded-selected-prints-mixtral-8x7b-instruct-vllm condition=print
+
+torchrun --nproc_per_node 2 experiments/humaneval-patch/eval/eval_model.py model=mixtral-8x7b-instruct-vllm data=humaneval-patch-gpt4-prints-exploded-selected-prints-mixtral-8x7b-instruct-vllm condition=print

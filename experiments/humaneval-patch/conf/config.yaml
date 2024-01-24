@@ -1,4 +1,4 @@
 defaults:
   - model: huggingfaceh4-zephyr-7b-beta-hf
-  - data: humaneval-patch-122723
+  - data: humaneval-patch-control
   - condition: control

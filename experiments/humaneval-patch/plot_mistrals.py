@@ -19,10 +19,10 @@ file_paths = [
     "metrics/humaneval-py-mutants/mixtral_7b_instruct/seed1.json",
     "metrics/humaneval-patch-control/mistral-7b-instruct-v02-hf/seed1.json",
     "metrics/humaneval-patch-control/mixtral_7b_instruct/seed1.json",
-    "metrics/humaneval-patch-print/mistral-7b-instruct-v02-hf/seed1.json",
-    "metrics/humaneval-patch-print/mixtral_7b_instruct/seed1.json",
-    "metrics/humaneval-patch-011224-temp07-gpt4prints-exploded-selected-prints-gpt4/mistral-7b-instruct-v02-hf/seed1.json",
-    "metrics/humaneval-patch-011224-temp07-gpt4prints-exploded-selected-prints-gpt4/mixtral_7b_instruct/seed1.json"
+    "metrics/humaneval-patch-gpt4-prints-selected-prints-gpt4/mistral-7b-instruct-v02-hf/seed1.json",
+    "metrics/humaneval-patch-gpt4-prints-selected-prints-gpt4/mixtral_7b_instruct/seed1.json",
+    "metrics/humaneval-patch-gpt4-prints-selected-prints-mixtral-8x7b-instruct-vllm/mistral-7b-instruct-v02-hf/seed1.json",
+    "metrics/humaneval-patch-gpt4-prints-selected-prints-mixtral-8x7b-instruct-vllm/mixtral_7b_instruct/seed1.json"
 ]
 
 

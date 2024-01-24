@@ -146,8 +146,8 @@ def main(args: DictConfig) -> None:
         print(f"==== Completions generated in {time.time() - start} seconds ====")
     
     
-    selected_prints_df.to_csv(f'data/{args.data.path[5:-4]}-selected-prints-{args.model.name}.csv')
-    with open(f'print-insertions/metrics/{args.data.path[5:-4]}/{args.model.name}/seed{seed}.json', 'w') as f:
+    selected_prints_df.to_csv(f'data/{args.data.path[5:-4]}-selected-prints-{args.model.name.lower()}.csv')
+    with open(f'print-insertions/metrics/{args.data.path[5:-4]}/{args.model.name.lower()}/seed{seed}.json', 'w') as f:
         json.dump(item_level_accs, f)
     with open(f'print-insertions/completions/{args.data.path[5:-4]}/{args.model.name}/seed{seed}.json', 'w') as f:
         json.dump(samples, f)
