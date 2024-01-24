@@ -17,7 +17,7 @@ To reproduce the following figure:
 - Evaluate each of Mistral and Mixtral's accuracies using a batch script:
   ```sbatch experiments/humaneval-patch/scripts/humaneval-patch-eval-all.sh```
 
-- Produce the figure using python experiments/humaneval-patch/plot_mistrals.py
+- Produce the figure using ```python experiments/humaneval-patch/plot_mistrals.py```
 
 ![mistral-and-mixtral-results](experiments/humaneval-patch/figures/mistral-and-mixtral-bothselections.png)
 
